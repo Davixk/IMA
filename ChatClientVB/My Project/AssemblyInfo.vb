@@ -11,11 +11,10 @@ Imports System.Windows
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("SignalChat")>
+<Assembly: AssemblyTitle("InstantMessagingApp")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("SignalChat")>
-<Assembly: AssemblyCopyright("Copyright ©  2017 Meshack Musundi")>
+<Assembly: AssemblyProduct("InstantMessagingApp")>
 <Assembly: AssemblyTrademark("")>
 <Assembly: ComVisible(false)>
 

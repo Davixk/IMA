@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("SignalChatServer")>
+<Assembly: AssemblyTitle("InstantMessagingAppServer")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("SignalChatServer")>
+<Assembly: AssemblyProduct("InstantMessagingAppServer")>
 <Assembly: AssemblyCopyright("Copyright © 2017 Meshack Musundi")>
 <Assembly: AssemblyTrademark("")>
 

@@ -53,7 +53,7 @@
             </Style>
 
             <local:ViewModelLocator x:Key="VMLocator"/>
-            <BitmapImage x:Key="BlankImage" UriSource="/SignalChat;component/Imgs/blank.png"/>
+            <BitmapImage x:Key="BlankImage" UriSource="/InstantMessagingApp;component/Imgs/blank.png"/>
             <local:ByteBitmapSourceConverter x:Key="ByteBmpSrcConverter"/>
         </ResourceDictionary>
 
