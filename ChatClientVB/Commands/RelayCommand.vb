@@ -1,21 +1,21 @@
 ﻿Public Class RelayCommand
     Implements ICommand
 
-    Private ReadOnly _execute As Action(Of Object)
-    Private ReadOnly _canExecute As Predicate(Of Object)
+    Private ReadOnly _esegui As Action(Of Object)
+    Private ReadOnly _eseguibile As Predicate(Of Object)
 
     Public Sub New(ByVal execute As Action(Of Object))
         Me.New(execute, Nothing)
     End Sub
 
-    Public Sub New(ByVal execute As Action(Of Object), ByVal canExecute As Predicate(Of Object))
-        If execute Is Nothing Then Throw New ArgumentNullException("execute")
-        _execute = execute
-        _canExecute = canExecute
+    Public Sub New(ByVal esegui As Action(Of Object), ByVal eseguibile As Predicate(Of Object))
+        If esegui Is Nothing Then Throw New ArgumentNullException("esegui")
+        _esegui = esegui
+        _eseguibile = eseguibile
     End Sub
 
-    Public Function CanExecute(parameter As Object) As Boolean Implements ICommand.CanExecute
-        Return If(_canExecute Is Nothing, True, _canExecute(parameter))
+    Public Function CanExecute(parametro As Object) As Boolean Implements ICommand.CanExecute
+        Return If(_eseguibile Is Nothing, True, _eseguibile(parametro))
     End Function
 
     Public Custom Event CanExecuteChanged As EventHandler Implements ICommand.CanExecuteChanged
@@ -31,30 +31,30 @@
         End RaiseEvent
     End Event
 
-    Public Sub Execute(parameter As Object) Implements ICommand.Execute
-        _execute(parameter)
+    Public Sub Execute(parametro As Object) Implements ICommand.Execute
+        _esegui(parametro)
     End Sub
 End Class
 
 Public Class RelayCommand(Of T)
     Implements ICommand
 
-    Private ReadOnly _execute As Action(Of T)
-    Private ReadOnly _canExecute As Predicate(Of T)
+    Private ReadOnly _esegui As Action(Of T)
+    Private ReadOnly _eseguibile As Predicate(Of T)
 
-    Public Sub New(ByVal execute As Action(Of T))
-        Me.New(execute, Nothing)
+    Public Sub New(ByVal esegui As Action(Of T))
+        Me.New(esegui, Nothing)
     End Sub
 
-    Public Sub New(ByVal execute As Action(Of T), ByVal canExecute As Predicate(Of T))
-        If execute Is Nothing Then Throw New ArgumentNullException("execute")
-        _execute = execute
-        _canExecute = canExecute
+    Public Sub New(ByVal esegui As Action(Of T), ByVal eseguibile As Predicate(Of T))
+        If esegui Is Nothing Then Throw New ArgumentNullException("esegui")
+        _esegui = esegui
+        _eseguibile = eseguibile
     End Sub
 
     <DebuggerStepThrough()>
     Public Function CanExecute(ByVal parameter As Object) As Boolean Implements ICommand.CanExecute
-        Return If(_canExecute Is Nothing, True, _canExecute(CType(parameter, T)))
+        Return If(_eseguibile Is Nothing, True, _eseguibile(CType(parameter, T)))
     End Function
 
     Public Custom Event CanExecuteChanged As EventHandler Implements ICommand.CanExecuteChanged
@@ -70,7 +70,7 @@ Public Class RelayCommand(Of T)
         End RaiseEvent
     End Event
 
-    Public Sub Execute(ByVal parameter As Object) Implements ICommand.Execute
-        _execute(CType(parameter, T))
+    Public Sub Execute(ByVal parametro As Object) Implements ICommand.Execute
+        _esegui(CType(parametro, T))
     End Sub
 End Class

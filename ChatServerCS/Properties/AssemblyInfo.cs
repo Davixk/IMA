@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("InstantMessagingAppServer")]
-[assembly: AssemblyCopyright("Copyright ©  2017 Meshack Musundi")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

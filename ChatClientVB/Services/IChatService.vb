@@ -1,22 +1,22 @@
 ﻿Public Interface IChatService
-    Event ParticipantLoggedIn(ByVal participant As User)
-    Event ParticipantLoggedOut(ByVal name As String)
-    Event ParticipantDisconnected(ByVal name As String)
-    Event ParticipantReconnected(ByVal name As String)
-    Event ConnectionReconnecting()
-    Event ConnectionReconnected()
-    Event ConnectionClosed()
-    Event NewTextMessage(ByVal sender As String, ByVal msg As String, ByVal mt As MessageType)
-    Event NewImageMessage(ByVal sender As String, ByVal img As Byte(), ByVal mt As MessageType)
-    Event ParticipantTyping(ByVal name As String)
+    Event PartecipanteHaFattoAccesso(ByVal partecipante As Utente)
+    Event PartecipanteSiEDisconnesso(ByVal nome As String)
+    Event PartecipanteDisconnesso(ByVal nome As String)
+    Event PartecipanteRiconnesso(ByVal nome As String)
+    Event ConnessioneRiconnessione()
+    Event ConnessioneRistabilita()
+    Event ConnessioneChiusa()
+    Event NuovoMsgTesto(ByVal mittente As String, ByVal testo As String, ByVal tipoMsg As TipoDiMessaggio)
+    Event NuovoMsgImmagine(ByVal mittente As String, ByVal img As Byte(), ByVal tipoMsg As TipoDiMessaggio)
+    Event PartecipanteStaScrivendo(ByVal nome As String)
 
-    Function ConnectAsync() As Task
-    Function LoginAsync(name As String, photo As Byte()) As Task(Of List(Of User))
-    Function LogoutAsync() As Task
+    Function ConnessioneAsync() As Task
+    Function AccessoAsincr(nome As String, imgProfilo As Byte()) As Task(Of List(Of Utente))
+    Function DisconnessioneAsincr() As Task
 
-    Function SendBroadcastMessageAsync(msg As String) As Task
-    Function SendBroadcastMessageAsync(img As Byte()) As Task
-    Function SendUnicastMessageAsync(ByVal recepient As String, ByVal msg As String) As Task
-    Function SendUnicastMessageAsync(ByVal recepient As String, ByVal img As Byte()) As Task
-    Function TypingAsync(recepient As String) As Task
+    Function MandaMsgBroadcastAsincr(testo As String) As Task
+    Function MandaMsgBroadcastAsincr(img As Byte()) As Task
+    Function MandaMsgUnicastAsincr(ByVal destinatario As String, ByVal testo As String) As Task
+    Function MandaMsgUnicastAsincr(ByVal destinatario As String, ByVal img As Byte()) As Task
+    Function StaScrivendoAsincr(destinatario As String) As Task
 End Interface

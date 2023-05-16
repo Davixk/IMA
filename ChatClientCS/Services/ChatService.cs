@@ -1,4 +1,16 @@
-﻿using System;
+﻿/*
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+
+INSERISCI COMMENTO SPIEGAZIONE QUI
+
+
+
+*/
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ChatClientCS.Enums;
@@ -10,91 +22,91 @@ namespace ChatClientCS.Services
 {
     public class ChatService : IChatService
     {
-        public event Action<string, string, MessageType> NewTextMessage;
-        public event Action<string, byte[], MessageType> NewImageMessage;
-        public event Action<string> ParticipantDisconnected;
-        public event Action<User> ParticipantLoggedIn;
-        public event Action<string> ParticipantLoggedOut;
-        public event Action<string> ParticipantReconnected;
-        public event Action ConnectionReconnecting;
-        public event Action ConnectionReconnected;
-        public event Action ConnectionClosed;
-        public event Action<string> ParticipantTyping;
+        public event Action<string, string, TipoDiMessaggio> NuovoMsgTesto;
+        public event Action<string, byte[], TipoDiMessaggio> NuovoMsgImmagine;
+        public event Action<string> PartecipanteDisconnesso;
+        public event Action<Utente> PartecipanteHaFattoAccesso;
+        public event Action<string> PartecipanteSiEDisconnesso;
+        public event Action<string> PartecipanteRiconnesso;
+        public event Action RiconnessioneInCorso;
+        public event Action ConnessioneRistabilita;
+        public event Action ConnessioneChiusa;
+        public event Action<string> PartecipanteStaScrivendo;
 
         private IHubProxy hubProxy;
-        private HubConnection connection;
-        private string url = "http://localhost:8080/signalchat";
+        private HubConnection connessione;
+        private string url = "http://localhost:8080/InstantMessagingApp";
 
-        public async Task ConnectAsync()
+        public async Task ConnessioneAsync()
         {
-            connection = new HubConnection(url);
-            hubProxy = connection.CreateHubProxy("ChatHub");
-            hubProxy.On<User>("ParticipantLogin", (u) => ParticipantLoggedIn?.Invoke(u));
-            hubProxy.On<string>("ParticipantLogout", (n) => ParticipantLoggedOut?.Invoke(n));
-            hubProxy.On<string>("ParticipantDisconnection", (n) => ParticipantDisconnected?.Invoke(n));
-            hubProxy.On<string>("ParticipantReconnection", (n) => ParticipantReconnected?.Invoke(n));
-            hubProxy.On<string, string>("BroadcastTextMessage", (n, m) => NewTextMessage?.Invoke(n, m, MessageType.Broadcast));
-            hubProxy.On<string, byte[]>("BroadcastPictureMessage", (n, m) => NewImageMessage?.Invoke(n, m, MessageType.Broadcast));
-            hubProxy.On<string, string>("UnicastTextMessage", (n, m) => NewTextMessage?.Invoke(n, m, MessageType.Unicast));
-            hubProxy.On<string, byte[]>("UnicastPictureMessage", (n, m) => NewImageMessage?.Invoke(n, m, MessageType.Unicast));
-            hubProxy.On<string>("ParticipantTyping", (p) => ParticipantTyping?.Invoke(p));
+            connessione = new HubConnection(url);
+            hubProxy = connessione.CreateHubProxy("ChatHub");
+            hubProxy.On<Utente>("AccessoPartecipante", (u) => PartecipanteHaFattoAccesso?.Invoke(u));
+            hubProxy.On<string>("LogoutPartecipante", (n) => PartecipanteSiEDisconnesso?.Invoke(n));
+            hubProxy.On<string>("DisconnessionePartecipante", (n) => PartecipanteDisconnesso?.Invoke(n));
+            hubProxy.On<string>("RiconnessionePartecipante", (n) => PartecipanteRiconnesso?.Invoke(n));
+            hubProxy.On<string, string>("MsgTestoBroadcast", (n, m) => NuovoMsgTesto?.Invoke(n, m, TipoDiMessaggio.Broadcast));
+            hubProxy.On<string, byte[]>("MsgImmagineBroadcast", (n, m) => NuovoMsgImmagine?.Invoke(n, m, TipoDiMessaggio.Broadcast));
+            hubProxy.On<string, string>("MsgTestoUnicast", (n, m) => NuovoMsgTesto?.Invoke(n, m, TipoDiMessaggio.Unicast));
+            hubProxy.On<string, byte[]>("MsgImmagineUnicast", (n, m) => NuovoMsgImmagine?.Invoke(n, m, TipoDiMessaggio.Unicast));
+            hubProxy.On<string>("PartecipanteStaScrivendo", (p) => PartecipanteStaScrivendo?.Invoke(p));
 
-            connection.Reconnecting += Reconnecting;
-            connection.Reconnected += Reconnected;
-            connection.Closed += Disconnected;
+            connessione.Reconnecting += Riconnessione;
+            connessione.Reconnected += Riconnesso;
+            connessione.Closed += Disconnesso;
 
             ServicePointManager.DefaultConnectionLimit = 10;
-            await connection.Start();
+            await connessione.Start();
         }
 
-        private void Disconnected()
+        
+
+        private void Riconnesso()
         {
-            ConnectionClosed?.Invoke();
+            ConnessioneRistabilita?.Invoke();
         }
-
-        private void Reconnected()
+        private void Disconnesso()
         {
-            ConnectionReconnected?.Invoke();
+            ConnessioneChiusa?.Invoke();
         }
-
-        private void Reconnecting()
+        private void Riconnessione()
         {
-            ConnectionReconnecting?.Invoke();
+            RiconnessioneInCorso?.Invoke();
         }
 
-        public async Task<List<User>> LoginAsync(string name, byte[] photo)
+        public async Task<List<Utente>> AccessoAsincr(string nome, byte[] immagineProf)
         {
-            return await hubProxy.Invoke<List<User>>("Login", new object[] { name, photo });
+            return await hubProxy.Invoke<List<Utente>>("Accesso", new object[] { nome, immagineProf });
         }
 
-        public async Task LogoutAsync()
+        public async Task DisconnessioneAsincr()
         {
             await hubProxy.Invoke("Logout");
         }
 
-        public async Task SendBroadcastMessageAsync(string msg)
+        public async Task MandaMsgBroadcastAsincr(string msg)
         {
-            await hubProxy.Invoke("BroadcastTextMessage", msg);
+            await hubProxy.Invoke("MsgTestoBroadcast", msg);
         }
 
-        public async Task SendBroadcastMessageAsync(byte[] img)
+        public async Task MandaMsgBroadcastAsincr(byte[] img)
         {
-            await hubProxy.Invoke("BroadcastImageMessage", img);
+            await hubProxy.Invoke("MsgImmagineBroadcast", img);
         }
 
-        public async Task SendUnicastMessageAsync(string recepient, string msg)
+        public async Task MandaMsgUnicastAsincr(string destinatario, string msg)
         {
-            await hubProxy.Invoke("UnicastTextMessage", new object[] { recepient, msg });
+            await hubProxy.Invoke("MsgTestoUnicast", new object[] { destinatario, msg });
         }
 
-        public async Task SendUnicastMessageAsync(string recepient, byte[] img)
+        public async Task MandaMsgUnicastAsincr(string destinatario, byte[] img)
         {
-            await hubProxy.Invoke("UnicastImageMessage", new object[] { recepient, img });
+            await hubProxy.Invoke("MsgImmagineUnicast", new object[] { destinatario, img });
         }
 
-        public async Task TypingAsync(string recepient)
+        public async Task StaScrivendoAsincr(string destinatario)
         {
-            await hubProxy.Invoke("Typing", recepient);
+            await hubProxy.Invoke("StaScrivendo", destinatario);
         }
     }
 }

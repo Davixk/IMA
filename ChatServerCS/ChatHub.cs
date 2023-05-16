@@ -9,107 +9,107 @@ namespace ChatServerCS
 {
     public class ChatHub : Hub<IClient>
     {
-        private static ConcurrentDictionary<string, User> ChatClients = new ConcurrentDictionary<string, User>();
+        private static ConcurrentDictionary<string, Utente> ChatClients = new ConcurrentDictionary<string, Utente>();
 
         public override Task OnDisconnected(bool stopCalled)
         {
             var userName = ChatClients.SingleOrDefault((c) => c.Value.ID == Context.ConnectionId).Key;
             if (userName != null)
             {
-                Clients.Others.ParticipantDisconnection(userName);
-                Console.WriteLine($"<> {userName} disconnected");
+                Clients.Others.DisconnessionePartecipante(userName);
+                Console.WriteLine($"<> {userName} ha chiuso il client");
             }
             return base.OnDisconnected(stopCalled);
         }
 
         public override Task OnReconnected()
         {
-            var userName = ChatClients.SingleOrDefault((c) => c.Value.ID == Context.ConnectionId).Key;
-            if (userName != null)
+            var nomeUtente = ChatClients.SingleOrDefault((c) => c.Value.ID == Context.ConnectionId).Key;
+            if (nomeUtente != null)
             {
-                Clients.Others.ParticipantReconnection(userName);
-                Console.WriteLine($"== {userName} reconnected");
+                Clients.Others.RiconnessionePartecipante(nomeUtente);
+                Console.WriteLine($"== {nomeUtente} riconnesso");
             }
             return base.OnReconnected();
         }
 
-        public List<User> Login(string name, byte[] photo)
+        public List<Utente> Accesso(string nome, byte[] foto)
         {
-            if (!ChatClients.ContainsKey(name))
+            if (!ChatClients.ContainsKey(nome))
             {
-                Console.WriteLine($"++ {name} logged in");
-                List<User> users = new List<User>(ChatClients.Values);
-                User newUser = new User { Name = name, ID = Context.ConnectionId, Photo = photo };
-                var added = ChatClients.TryAdd(name, newUser);
-                if (!added) return null;
-                Clients.CallerState.UserName = name;
-                Clients.Others.ParticipantLogin(newUser);
-                return users;
+                Console.WriteLine($"++ {nome} si è connesso");
+                List<Utente> utenti = new List<Utente>(ChatClients.Values);
+                Utente nuovoUtente = new Utente { Nome = nome, ID = Context.ConnectionId, imgProfilo = foto };
+                var aggiunto = ChatClients.TryAdd(nome, nuovoUtente);
+                if (!aggiunto) return null;
+                Clients.CallerState.UserName = nome;
+                Clients.Others.AccessoPartecipante(nuovoUtente);
+                return utenti;
             }
             return null;
         }
 
         public void Logout()
         {
-            var name = Clients.CallerState.UserName;
-            if (!string.IsNullOrEmpty(name))
+            var nome = Clients.CallerState.UserName;
+            if (!string.IsNullOrEmpty(nome))
             {
-                User client = new User();
-                ChatClients.TryRemove(name, out client);
-                Clients.Others.ParticipantLogout(name);
-                Console.WriteLine($"-- {name} logged out");
+                Utente client = new Utente();
+                ChatClients.TryRemove(nome, out client);
+                Clients.Others.LogoutPartecipante(nome);
+                Console.WriteLine($"-- {nome} si è disconnesso");
             }
         }
 
-        public void BroadcastTextMessage(string message)
+        public void MsgTestoBroadcast(string messaggio)
         {
-            var name = Clients.CallerState.UserName;
-            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(message))
+            var nome = Clients.CallerState.UserName;
+            if (!string.IsNullOrEmpty(nome) && !string.IsNullOrEmpty(messaggio))
             {
-                Clients.Others.BroadcastTextMessage(name, message);
+                Clients.Others.MsgTestoBroadcast(nome, messaggio);
             }
         }
 
-        public void BroadcastImageMessage(byte[] img)
+        public void MsgImmagineBroadcast(byte[] img)
         {
-            var name = Clients.CallerState.UserName;
+            var nome = Clients.CallerState.UserName;
             if (img != null)
             {
-                Clients.Others.BroadcastPictureMessage(name, img);
+                Clients.Others.MsgImmagineBroadcast(nome, img);
             }
         }
 
-        public void UnicastTextMessage(string recepient, string message)
+        public void MsgTestoUnicast(string destinatario, string messaggio)
         {
-            var sender = Clients.CallerState.UserName;
-            if (!string.IsNullOrEmpty(sender) && recepient != sender &&
-                !string.IsNullOrEmpty(message) && ChatClients.ContainsKey(recepient))
+            var mittente = Clients.CallerState.UserName;
+            if (!string.IsNullOrEmpty(mittente) && destinatario != mittente &&
+                !string.IsNullOrEmpty(messaggio) && ChatClients.ContainsKey(destinatario))
             {
-                User client = new User();
-                ChatClients.TryGetValue(recepient, out client);
-                Clients.Client(client.ID).UnicastTextMessage(sender, message);
+                Utente client = new Utente();
+                ChatClients.TryGetValue(destinatario, out client);
+                Clients.Client(client.ID).MsgTestoUnicast(mittente, messaggio);
             }
         }
 
-        public void UnicastImageMessage(string recepient, byte[] img)
+        public void MsgImmagineUnicast(string destinatario, byte[] img)
         {
-            var sender = Clients.CallerState.UserName;
-            if (!string.IsNullOrEmpty(sender) && recepient != sender &&
-                img != null && ChatClients.ContainsKey(recepient))
+            var mittente = Clients.CallerState.UserName;
+            if (!string.IsNullOrEmpty(mittente) && destinatario != mittente &&
+                img != null && ChatClients.ContainsKey(destinatario))
             {
-                User client = new User();
-                ChatClients.TryGetValue(recepient, out client);
-                Clients.Client(client.ID).UnicastPictureMessage(sender, img);
+                Utente client = new Utente();
+                ChatClients.TryGetValue(destinatario, out client);
+                Clients.Client(client.ID).MsgImmagineUnicast(mittente, img);
             }
         }
 
-        public void Typing(string recepient)
+        public void StaScrivendo(string destinatario)
         {
-            if (string.IsNullOrEmpty(recepient)) return;
-            var sender = Clients.CallerState.UserName;
-            User client = new User();
-            ChatClients.TryGetValue(recepient, out client);
-            Clients.Client(client.ID).ParticipantTyping(sender);
+            if (string.IsNullOrEmpty(destinatario)) return;
+            var mittente = Clients.CallerState.UserName;
+            Utente client = new Utente();
+            ChatClients.TryGetValue(destinatario, out client);
+            Clients.Client(client.ID).PartecipanteStaScrivendo(mittente);
         }
     }
 }

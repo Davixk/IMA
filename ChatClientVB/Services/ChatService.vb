@@ -5,84 +5,80 @@ Imports Microsoft.AspNet.SignalR.Client
 Public Class ChatService
     Implements IChatService
 
-    Public Event ParticipantDisconnected(name As String) Implements IChatService.ParticipantDisconnected
-    Public Event ParticipantLoggedIn(participant As User) Implements IChatService.ParticipantLoggedIn
-    Public Event ParticipantLoggedOut(name As String) Implements IChatService.ParticipantLoggedOut
-    Public Event ParticipantReconnected(name As String) Implements IChatService.ParticipantReconnected
-    Public Event ConnectionReconnecting() Implements IChatService.ConnectionReconnecting
-    Public Event ConnectionReconnected() Implements IChatService.ConnectionReconnected
-    Public Event ConnectionClosed() Implements IChatService.ConnectionClosed
-    Public Event NewTextMessage(sender As String, msg As String, mt As MessageType) Implements IChatService.NewTextMessage
-    Public Event NewImageMessage(sender As String, img As Byte(), mt As MessageType) Implements IChatService.NewImageMessage
-    Public Event ParticipantTyping(name As String) Implements IChatService.ParticipantTyping
+    Public Event PartecipanteDisconnesso(name As String) Implements IChatService.PartecipanteDisconnesso
+    Public Event PartecipanteHaFattoAccesso(participant As Utente) Implements IChatService.PartecipanteHaFattoAccesso
+    Public Event PartecipanteSiEDisconnesso(name As String) Implements IChatService.PartecipanteSiEDisconnesso
+    Public Event PartecipanteRiconnesso(name As String) Implements IChatService.PartecipanteRiconnesso
+    Public Event ConnessioneRiconnessione() Implements IChatService.ConnessioneRiconnessione
+    Public Event ConnessioneRistabilita() Implements IChatService.ConnessioneRistabilita
+    Public Event ConnessioneChiusa() Implements IChatService.ConnessioneChiusa
+    Public Event NuovoMsgTesto(sender As String, msg As String, mt As TipoDiMessaggio) Implements IChatService.NuovoMsgTesto
+    Public Event NuovoMsgImmagine(sender As String, img As Byte(), mt As TipoDiMessaggio) Implements IChatService.NuovoMsgImmagine
+    Public Event PartecipanteStaScrivendo(name As String) Implements IChatService.PartecipanteStaScrivendo
 
     Private hubProxy As IHubProxy
-    Private connection As HubConnection
-    Private url As String = "http://localhost:8080/signalchat"
+    Private connessione As HubConnection
+    Private url As String = "http://localhost:8080/InstantMessagingApp"
 
-    Public Async Function ConnectAsync() As Task Implements IChatService.ConnectAsync
-        connection = New HubConnection(url)
-        hubProxy = connection.CreateHubProxy("ChatHub")
-        hubProxy.On(Of User)("ParticipantLogin", Sub(u) RaiseEvent ParticipantLoggedIn(u))
-        hubProxy.On(Of String)("ParticipantLogout", Sub(n) RaiseEvent ParticipantLoggedOut(n))
-        hubProxy.On(Of String)("ParticipantDisconnection", Sub(n) RaiseEvent ParticipantDisconnected(n))
-        hubProxy.On(Of String)("ParticipantReconnection", Sub(n) RaiseEvent ParticipantReconnected(n))
-        hubProxy.On(Of String, String)("BroadcastTextMessage",
-                                       Sub(n, m) RaiseEvent NewTextMessage(n, m, MessageType.Broadcast))
-        hubProxy.On(Of String, Byte())("BroadcastPictureMessage",
-                                       Sub(n, m) RaiseEvent NewImageMessage(n, m, MessageType.Broadcast))
-        hubProxy.On(Of String, String)("UnicastTextMessage",
-                                       Sub(n, m) RaiseEvent NewTextMessage(n, m, MessageType.Unicast))
-        hubProxy.On(Of String, Byte())("UnicastPictureMessage",
-                                       Sub(n, m) RaiseEvent NewImageMessage(n, m, MessageType.Unicast))
-        hubProxy.On(Of String)("ParticipantTyping", Sub(p) RaiseEvent ParticipantTyping(p))
+    Public Async Function ConnessioneAsync() As Task Implements IChatService.ConnessioneAsync
+        connessione = New HubConnection(url)
+        hubProxy = connessione.CreateHubProxy("ChatHub")
+        hubProxy.On(Of Utente)("LoginPartecipante", Sub(u) RaiseEvent PartecipanteHaFattoAccesso(u))
+        hubProxy.On(Of String)("LogoutPartecipante", Sub(n) RaiseEvent PartecipanteSiEDisconnesso(n))
+        hubProxy.On(Of String)("DisconnessionePartecipante", Sub(n) RaiseEvent PartecipanteDisconnesso(n))
+        hubProxy.On(Of String)("RiconnessionePartecipante", Sub(n) RaiseEvent PartecipanteRiconnesso(n))
+        hubProxy.On(Of String, String)("MsgTestoBroadcast", Sub(n, m) RaiseEvent NuovoMsgTesto(n, m, TipoDiMessaggio.Broadcast))
+        hubProxy.On(Of String, Byte())("MsgImmagineBroadcast", Sub(n, m) RaiseEvent NuovoMsgImmagine(n, m, TipoDiMessaggio.Broadcast))
+        hubProxy.On(Of String, String)("MsgTestoUnicast", Sub(n, m) RaiseEvent NuovoMsgTesto(n, m, TipoDiMessaggio.Unicast))
+        hubProxy.On(Of String, Byte())("MsgImmagineUnicast", Sub(n, m) RaiseEvent NuovoMsgImmagine(n, m, TipoDiMessaggio.Unicast))
+        hubProxy.On(Of String)("PartecipanteStaScrivendo", Sub(p) RaiseEvent PartecipanteStaScrivendo(p))
 
-        AddHandler connection.Reconnecting, AddressOf Reconnecting
-        AddHandler connection.Reconnected, AddressOf Reconnected
-        AddHandler connection.Closed, AddressOf Disconnected
+        AddHandler connessione.Reconnecting, AddressOf Riconnessione
+        AddHandler connessione.Reconnected, AddressOf Riconnesso
+        AddHandler connessione.Closed, AddressOf Disconnesso
 
         ServicePointManager.DefaultConnectionLimit = 10
-        Await connection.Start()
+        Await connessione.Start()
     End Function
 
-    Private Sub Disconnected()
-        RaiseEvent ConnectionClosed()
+    Private Sub Disconnesso()
+        RaiseEvent ConnessioneChiusa()
     End Sub
 
-    Private Sub Reconnecting()
-        RaiseEvent ConnectionReconnecting()
+    Private Sub Riconnessione()
+        RaiseEvent ConnessioneRiconnessione()
     End Sub
 
-    Private Sub Reconnected()
-        RaiseEvent ConnectionReconnected()
+    Private Sub Riconnesso()
+        RaiseEvent ConnessioneRistabilita()
     End Sub
 
-    Public Async Function LoginAsync(name As String, photo As Byte()) As Task(Of List(Of User)) Implements IChatService.LoginAsync
-        Dim users = Await hubProxy.Invoke(Of List(Of User))("Login", New Object() {name, photo})
-        Return users
+    Public Async Function AccessoAsincr(nome As String, immagineProf As Byte()) As Task(Of List(Of Utente)) Implements IChatService.AccessoAsincr
+        Dim utenti = Await hubProxy.Invoke(Of List(Of Utente))("Accesso", New Object() {nome, immagineProf})
+        Return utenti
     End Function
 
-    Public Async Function LogoutAsync() As Task Implements IChatService.LogoutAsync
+    Public Async Function DisconnessioneAsincr() As Task Implements IChatService.DisconnessioneAsincr
         Await hubProxy.Invoke("Logout")
     End Function
 
-    Public Async Function SendBroadcastMessageAsync(msg As String) As Task Implements IChatService.SendBroadcastMessageAsync
-        Await hubProxy.Invoke("BroadcastTextMessage", msg)
+    Public Async Function MandaMsgBroadcastAsincr(msg As String) As Task Implements IChatService.MandaMsgBroadcastAsincr
+        Await hubProxy.Invoke("MsgTestoBroadcast", msg)
     End Function
 
-    Public Async Function SendBroadcastMessageAsync(img As Byte()) As Task Implements IChatService.SendBroadcastMessageAsync
-        Await hubProxy.Invoke("BroadcastImageMessage", img)
+    Public Async Function MandaMsgBroadcastAsincr(img As Byte()) As Task Implements IChatService.MandaMsgBroadcastAsincr
+        Await hubProxy.Invoke("MsgImmagineBroadcast", img)
     End Function
 
-    Public Async Function SendUnicastMessageAsync(recepient As String, msg As String) As Task Implements IChatService.SendUnicastMessageAsync
-        Await hubProxy.Invoke("UnicastTextMessage", New Object() {recepient, msg})
+    Public Async Function MandaMsgUnicastAsincr(destinatario As String, msg As String) As Task Implements IChatService.MandaMsgUnicastAsincr
+        Await hubProxy.Invoke("MsgTestoUnicast", New Object() {destinatario, msg})
     End Function
 
-    Public Async Function SendUnicastMessageAsync(recepient As String, img As Byte()) As Task Implements IChatService.SendUnicastMessageAsync
-        Await hubProxy.Invoke("UnicastImageMessage", New Object() {recepient, img})
+    Public Async Function MandaMsgUnicastAsincr(destinatario As String, img As Byte()) As Task Implements IChatService.MandaMsgUnicastAsincr
+        Await hubProxy.Invoke("MsgImmagineUnicast", New Object() {destinatario, img})
     End Function
 
-    Public Async Function TypingAsync(recepient As String) As Task Implements IChatService.TypingAsync
-        Await hubProxy.Invoke("Typing", recepient)
+    Public Async Function StaScrivendoAsincr(destinatario As String) As Task Implements IChatService.StaScrivendoAsincr
+        Await hubProxy.Invoke("StaScrivendo", destinatario)
     End Function
 End Class

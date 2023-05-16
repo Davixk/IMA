@@ -12,133 +12,133 @@ Public Class MainWindowViewModel
     Private Const MAX_IMAGE_WIDTH As Integer = 150
     Private Const MAX_IMAGE_HEIGHT As Integer = 150
 
-    Private _userName As String
-    Public Property UserName As String
+    Private _nomeUtente As String
+    Public Property NomeUtente As String
         Get
-            Return _userName
+            Return _nomeUtente
         End Get
         Set(value As String)
-            _userName = value
+            _nomeUtente = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _profilePic As String
-    Public Property ProfilePic As String
+    Private _imgProfilo As String
+    Public Property imgProfilo As String
         Get
-            Return _profilePic
+            Return _imgProfilo
         End Get
         Set(value As String)
-            _profilePic = value
+            _imgProfilo = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _participants As New ObservableCollection(Of Participant)
-    Public Property Participants As ObservableCollection(Of Participant)
+    Private _partecipanti As New ObservableCollection(Of Partecipante)
+    Public Property Partecipanti As ObservableCollection(Of Partecipante)
         Get
-            Return _participants
+            Return _partecipanti
         End Get
-        Set(value As ObservableCollection(Of Participant))
-            _participants = value
+        Set(value As ObservableCollection(Of Partecipante))
+            _partecipanti = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _selectedParticipant As Participant
-    Public Property SelectedParticipant As Participant
+    Private _partecipanteSelezionato As Partecipante
+    Public Property PartecipanteSelezionato As Partecipante
         Get
-            Return _selectedParticipant
+            Return _partecipanteSelezionato
         End Get
-        Set(value As Participant)
-            _selectedParticipant = value
-            If SelectedParticipant.HasSentNewMessage Then SelectedParticipant.HasSentNewMessage = False
+        Set(value As Partecipante)
+            _partecipanteSelezionato = value
+            If PartecipanteSelezionato.HaMandatoNuovoMsg Then PartecipanteSelezionato.HaMandatoNuovoMsg = False
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _userMode As UserModes
-    Public Property UserMode As UserModes
+    Private _modalitaUser As ModalitaUser
+    Public Property ModalitaUser As ModalitaUser
         Get
-            Return _userMode
+            Return _modalitaUser
         End Get
-        Set(value As UserModes)
-            _userMode = value
+        Set(value As ModalitaUser)
+            _modalitaUser = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _textMessage As String
-    Public Property TextMessage As String
+    Private _msgTesto As String
+    Public Property MsgTesto As String
         Get
-            Return _textMessage
+            Return _msgTesto
         End Get
         Set(value As String)
-            _textMessage = value
+            _msgTesto = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _isConnected As Boolean
-    Public Property IsConnected As Boolean
+    Private _connesso As Boolean
+    Public Property Connesso As Boolean
         Get
-            Return _isConnected
+            Return _connesso
         End Get
         Set(value As Boolean)
-            _isConnected = value
+            _connesso = value
             OnPropertyChanged()
         End Set
     End Property
 
-    Private _isLoggedIn As Boolean
-    Public Property IsLoggedIn As Boolean
+    Private _loggato As Boolean
+    Public Property Loggato As Boolean
         Get
-            Return _isLoggedIn
+            Return _loggato
         End Get
         Set(value As Boolean)
-            _isLoggedIn = value
+            _loggato = value
             OnPropertyChanged()
         End Set
     End Property
 
-#Region "Connect Command"
-    Private _connectCommand As ICommand
-    Public ReadOnly Property ConnectCommand As ICommand
+#Region "Comandi di connessione"
+    Private _opConnessione As ICommand
+    Public ReadOnly Property OpConnessione As ICommand
         Get
-            Return If(_connectCommand, New RelayCommandAsync(Function() Connect()))
+            Return If(_opConnessione, New RelayCommandAsync(Function() Connetti()))
         End Get
     End Property
 
-    Private Async Function Connect() As Task(Of Boolean)
+    Private Async Function Connetti() As Task(Of Boolean)
         Try
-            Await chatService.ConnectAsync()
-            IsConnected = True
+            Await chatService.ConnessioneAsync()
+            Connesso = True
             Return True
-        Catch ex As Exception
+        Catch eccezione As Exception
             Return False
         End Try
     End Function
 #End Region
 
-#Region "Login Command"
-    Private _loginCommand As ICommand
-    Public ReadOnly Property LoginCommand As ICommand
+#Region "Comandi di accesso"
+    Private _comandoLogin As ICommand
+    Public ReadOnly Property ComandoAccesso As ICommand
         Get
-            Return If(_loginCommand, New RelayCommandAsync(Function() Login(), AddressOf CanLogin))
+            Return If(_comandoLogin, New RelayCommandAsync(Function() Accesso(), AddressOf PuoAccedere))
         End Get
     End Property
 
-    Private Async Function Login() As Task(Of Boolean)
+    Private Async Function Accesso() As Task(Of Boolean)
         Try
-            Dim users As List(Of User)
-            users = Await chatService.LoginAsync(_userName, Avatar())
-            If users IsNot Nothing Then
-                users.ForEach(Sub(u) Participants.Add(New Participant With {.Name = u.Name, .Photo = u.Photo}))
-                UserMode = UserModes.Chat
-                IsLoggedIn = True
+            Dim utenti As List(Of Utente)
+            utenti = Await chatService.AccessoAsincr(_nomeUtente, Avatar())
+            If utenti IsNot Nothing Then
+                utenti.ForEach(Sub(u) Partecipanti.Add(New Partecipante With {.Nome = u.Nome, .imgProfilo = u.imgProfilo}))
+                ModalitaUser = ModalitaUser.Chat
+                Loggato = True
                 Return True
             Else
-                dialogService.ShowNotification("Username is already in use")
+                dialogService.ShowNotification("Nome utente già in uso")
                 Return False
             End If
         Catch ex As Exception
@@ -146,258 +146,258 @@ Public Class MainWindowViewModel
         End Try
     End Function
 
-    Private Function CanLogin() As Boolean
-        Return Not String.IsNullOrEmpty(UserName) AndAlso UserName.Length >= 2 AndAlso IsConnected
+    Private Function PuoAccedere() As Boolean
+        Return Not String.IsNullOrEmpty(NomeUtente) AndAlso NomeUtente.Length >= 2 AndAlso Connesso
     End Function
 #End Region
 
-#Region "Logout Command"
-    Private _logoutCommand As ICommand
-    Public ReadOnly Property LogoutCommand As ICommand
+#Region "Comandi di Logout"
+    Private _opLogout As ICommand
+    Public ReadOnly Property OpLogout As ICommand
         Get
-            Return If(_logoutCommand, New RelayCommandAsync(Function() Logout(), AddressOf CanLogout))
+            Return If(_opLogout, New RelayCommandAsync(Function() Logout(), AddressOf PuoDisconnettersi))
         End Get
     End Property
 
     Private Async Function Logout() As Task(Of Boolean)
         Try
-            Await chatService.LogoutAsync()
-            UserMode = UserModes.Login
+            Await chatService.DisconnessioneAsincr()
+            ModalitaUser = ModalitaUser.Accesso
             Return True
         Catch ex As Exception
             Return False
         End Try
     End Function
 
-    Private Function CanLogout() As Boolean
-        Return IsConnected AndAlso IsLoggedIn
+    Private Function PuoDisconnettersi() As Boolean
+        Return Connesso AndAlso Loggato
     End Function
 #End Region
 
-#Region "Typing Command"
-    Private _typingCommand As ICommand
-    Public ReadOnly Property TypingCommand As ICommand
+#Region "Comandi Scrittura"
+    Private _opStaScrivendo As ICommand
+    Public ReadOnly Property OpStaScrivendo As ICommand
         Get
-            Return If(_typingCommand, New RelayCommandAsync(Function() Typing(), AddressOf CanUseTypingCommand))
+            Return If(_opStaScrivendo, New RelayCommandAsync(Function() StaScrivendo(), AddressOf PuoUsareStaScrivendo))
         End Get
     End Property
 
-    Private Async Function Typing() As Task(Of Boolean)
+    Private Async Function StaScrivendo() As Task(Of Boolean)
         Try
-            Await chatService.TypingAsync(SelectedParticipant.Name)
+            Await chatService.StaScrivendoAsincr(PartecipanteSelezionato.Nome)
             Return True
         Catch ex As Exception
             Return False
         End Try
     End Function
 
-    Private Function CanUseTypingCommand() As Boolean
-        Return SelectedParticipant IsNot Nothing AndAlso SelectedParticipant.IsLoggedIn
+    Private Function PuoUsareStaScrivendo() As Boolean
+        Return PartecipanteSelezionato IsNot Nothing AndAlso PartecipanteSelezionato.Loggato
     End Function
 #End Region
 
-#Region "Send Text Message Command"
-    Private _sendTextMessageCommand As ICommand
-    Public ReadOnly Property SendTextMessageCommand As ICommand
+#Region "Comando per inviare messaggio di testo"
+    Private _opInviaMsgTesto As ICommand
+    Public ReadOnly Property OpInviaMsgTesto As ICommand
         Get
-            Return If(_sendTextMessageCommand, New RelayCommandAsync(Function() SendTextMessage(),
-                                                                     AddressOf CanSendTextMessage))
+            Return If(_opInviaMsgTesto, New RelayCommandAsync(Function() InviaMsgTesto(),
+                                                                     AddressOf PuoInviareMsgTesto))
         End Get
     End Property
 
-    Private Async Function SendTextMessage() As Task(Of Boolean)
+    Private Async Function InviaMsgTesto() As Task(Of Boolean)
         Try
-            Dim recepient = _selectedParticipant.Name
-            Await chatService.SendUnicastMessageAsync(recepient, _textMessage)
+            Dim destinatario = _partecipanteSelezionato.Nome
+            Await chatService.MandaMsgUnicastAsincr(destinatario, _msgTesto)
             Return True
         Catch ex As Exception
             Return False
         Finally
-            Dim msg As New ChatMessage With {.Author = UserName, .Message = _textMessage,
-                .Time = DateTime.Now, .IsOriginNative = True}
-            SelectedParticipant.Chatter.Add(msg)
-            TextMessage = String.Empty
+            Dim msg As New MessaggioChat With {.Autore = NomeUtente, .Testo = _msgTesto,
+                .DataOra = DateTime.Now, .IsOriginNative = True}
+            PartecipanteSelezionato.Chatter.Add(msg)
+            MsgTesto = String.Empty
         End Try
     End Function
 
-    Private Function CanSendTextMessage() As Boolean
-        Return Not String.IsNullOrEmpty(TextMessage) AndAlso IsConnected AndAlso
-            _selectedParticipant IsNot Nothing AndAlso _selectedParticipant.IsLoggedIn
+    Private Function PuoInviareMsgTesto() As Boolean
+        Return Not String.IsNullOrEmpty(MsgTesto) AndAlso Connesso AndAlso
+            _partecipanteSelezionato IsNot Nothing AndAlso _partecipanteSelezionato.Loggato
     End Function
 #End Region
 
-#Region "Send Picture Message Command"
-    Private _sendImageMessageCommand As ICommand
-    Public ReadOnly Property SendImageMessageCommand As ICommand
+#Region "Comando per inviare immagini"
+    Private _opInviaMsgImmagine As ICommand
+    Public ReadOnly Property OpInviaMsgImmagine As ICommand
         Get
-            Return If(_sendImageMessageCommand, New RelayCommandAsync(Function() SendImageMessage(),
-                                                                     AddressOf CanSendImageMessage))
+            Return If(_opInviaMsgImmagine, New RelayCommandAsync(Function() InviaMsgImmagine(),
+                                                                     AddressOf PuoMandareMsgImmagine))
         End Get
     End Property
 
-    Private Async Function SendImageMessage() As Task(Of Boolean)
-        Dim pic = dialogService.OpenFile("Select image file", "Images (*.jpg;*.png)|*.jpg;*.png")
-        If String.IsNullOrEmpty(pic) Then Return False
+    Private Async Function InviaMsgImmagine() As Task(Of Boolean)
+        Dim immagine = dialogService.OpenFile("Seleziona file immagine", "Immagini (*.jpg;*.png)|*.jpg;*.png")
+        If String.IsNullOrEmpty(immagine) Then Return False
 
-        Dim img = Await Task.Run(Function() File.ReadAllBytes(pic))
+        Dim img = Await Task.Run(Function() File.ReadAllBytes(immagine))
 
         Try
-            Dim recepient = _selectedParticipant.Name
-            Await chatService.SendUnicastMessageAsync(recepient, img)
+            Dim destinatario = _partecipanteSelezionato.Nome
+            Await chatService.MandaMsgUnicastAsincr(destinatario, img)
             Return True
         Catch ex As Exception
             Return False
         Finally
-            Dim msg As New ChatMessage With {.Author = UserName, .Picture = pic, .Time = DateTime.Now, .IsOriginNative = True}
-            SelectedParticipant.Chatter.Add(msg)
+            Dim msg As New MessaggioChat With {.Autore = NomeUtente, .Immagine = immagine, .DataOra = DateTime.Now, .IsOriginNative = True}
+            PartecipanteSelezionato.Chatter.Add(msg)
         End Try
     End Function
 
-    Private Function CanSendImageMessage() As Boolean
-        Return IsConnected AndAlso _selectedParticipant IsNot Nothing AndAlso _selectedParticipant.IsLoggedIn
+    Private Function PuoMandareMsgImmagine() As Boolean
+        Return Connesso AndAlso _partecipanteSelezionato IsNot Nothing AndAlso _partecipanteSelezionato.Loggato
     End Function
 #End Region
 
-#Region "Select Profile Picture Command"
-    Private _selectProfilePicCommand As ICommand
+#Region "Operazione Selezione Immagine Profilo"
+    Private _opSelezionaImgProfilo As ICommand
     Public ReadOnly Property SelectPhotoCommand As ICommand
         Get
-            Return If(_selectProfilePicCommand, New RelayCommand(AddressOf SelectProfilePic))
+            Return If(_opSelezionaImgProfilo, New RelayCommand(AddressOf SelezionaImgProfilo))
         End Get
     End Property
 
-    Private Sub SelectProfilePic()
-        Dim pic = dialogService.OpenFile("Select image file", "Images (*.jpg;*.png)|*.jpg;*.png")
-        If Not String.IsNullOrEmpty(pic) Then
-            Dim img = Image.FromFile(pic)
+    Private Sub SelezionaImgProfilo()
+        Dim _imgProfilo = dialogService.OpenFile("Seleziona file immagine", "Immagini (*.jpg;*.png)|*.jpg;*.png")
+        If Not String.IsNullOrEmpty(_imgProfilo) Then
+            Dim img = Image.FromFile(_imgProfilo)
             If img.Width > MAX_IMAGE_WIDTH OrElse img.Height > MAX_IMAGE_HEIGHT Then
-                dialogService.ShowNotification($"Image size should be {MAX_IMAGE_WIDTH} x {MAX_IMAGE_HEIGHT} or less.")
+                dialogService.ShowNotification($"Le dimensioni della immagine devono esesere di {MAX_IMAGE_WIDTH} x {MAX_IMAGE_HEIGHT} o inferiori.")
                 Exit Sub
             End If
-            ProfilePic = pic
+            imgProfilo = _imgProfilo
         End If
     End Sub
 #End Region
 
-#Region "Open Image Command"
-    Private _openImageCommand As ICommand
-    Public ReadOnly Property OpenImageCommand As ICommand
+#Region "Comando per aprire immagini"
+    Private _opApriImmagine As ICommand
+    Public ReadOnly Property OpApriImmagine As ICommand
         Get
-            Return If(_openImageCommand, New RelayCommand(Of ChatMessage)(Sub(m) OpenImage(m)))
+            Return If(_opApriImmagine, New RelayCommand(Of MessaggioChat)(Sub(m) ApriImmagine(m)))
         End Get
     End Property
 
-    Private Sub OpenImage(ByVal msg As ChatMessage)
-        Dim img = msg.Picture
+    Private Sub ApriImmagine(ByVal messaggio As MessaggioChat)
+        Dim img = messaggio.Immagine
         If (String.IsNullOrEmpty(img) OrElse Not File.Exists(img)) Then Exit Sub
         Process.Start(img)
     End Sub
 #End Region
 
-#Region "Event handlers"
-    Private Sub NewTextMessage(name As String, msg As String, mt As MessageType)
-        If mt = MessageType.Unicast Then
-            Dim cm As New ChatMessage With {.Author = name, .Message = msg, .Time = DateTime.Now}
-            Dim sender = _participants.Where(Function(u) String.Equals(u.Name, name)).FirstOrDefault
-            ctxTaskFactory.StartNew(Sub() sender.Chatter.Add(cm)).Wait()
+#Region "Gestione Eventi (Event handlers)"
+    Private Sub NuovoMsgTesto(nome As String, testo As String, tipoMsg As TipoDiMessaggio)
+        If tipoMsg = TipoDiMessaggio.Unicast Then
+            Dim msgChat As New MessaggioChat With {.Autore = nome, .Testo = testo, .DataOra = DateTime.Now}
+            Dim mittente = _partecipanti.Where(Function(u) String.Equals(u.Nome, nome)).FirstOrDefault
+            ctxTaskFactory.StartNew(Sub() mittente.Chatter.Add(msgChat)).Wait()
 
-            If Not (SelectedParticipant IsNot Nothing AndAlso sender.Name.Equals(SelectedParticipant.Name)) Then
-                ctxTaskFactory.StartNew(Sub() sender.HasSentNewMessage = True).Wait()
+            If Not (PartecipanteSelezionato IsNot Nothing AndAlso mittente.Nome.Equals(PartecipanteSelezionato.Nome)) Then
+                ctxTaskFactory.StartNew(Sub() mittente.HaMandatoNuovoMsg = True).Wait()
             End If
         End If
     End Sub
 
-    Private Sub NewImageMessage(name As String, pic As Byte(), mt As MessageType)
-        If mt = MessageType.Unicast Then
-            Dim imgsDirectory = Path.Combine(Environment.CurrentDirectory, "Image Messages")
-            If Not Directory.Exists(imgsDirectory) Then Directory.CreateDirectory(imgsDirectory)
+    Private Sub NuovoMsgImmagine(nome As String, immagine As Byte(), tipoMsg As TipoDiMessaggio)
+        If tipoMsg = TipoDiMessaggio.Unicast Then
+            Dim CartellaImmagini = Path.Combine(Environment.CurrentDirectory, "Image Messages")
+            If Not Directory.Exists(CartellaImmagini) Then Directory.CreateDirectory(CartellaImmagini)
 
-            Dim imgsCount = Directory.EnumerateFiles(imgsDirectory).Count() + 1
-            Dim imgPath = Path.Combine(imgsDirectory, $"IMG_{imgsCount}.jpg")
+            Dim contImmagini = Directory.EnumerateFiles(CartellaImmagini).Count() + 1
+            Dim percorsoImmagine = Path.Combine(CartellaImmagini, $"IMG_{contImmagini}.jpg")
 
-            Dim converter As New ImageConverter
-            Using img As Image = CType(converter.ConvertFrom(pic), Image)
-                img.Save(imgPath)
+            Dim convertitoreImmagini As New ImageConverter
+            Using img As Image = CType(convertitoreImmagini.ConvertFrom(immagine), Image)
+                img.Save(percorsoImmagine)
             End Using
 
-            Dim cm As New ChatMessage With {.Author = name, .Picture = imgPath, .Time = DateTime.Now}
-            Dim sender = _participants.Where(Function(u) String.Equals(u.Name, name)).FirstOrDefault
-            ctxTaskFactory.StartNew(Sub() sender.Chatter.Add(cm)).Wait()
+            Dim msgChat As New MessaggioChat With {.Autore = nome, .Immagine = percorsoImmagine, .DataOra = DateTime.Now}
+            Dim mittente = _partecipanti.Where(Function(u) String.Equals(u.Nome, nome)).FirstOrDefault
+            ctxTaskFactory.StartNew(Sub() mittente.Chatter.Add(msgChat)).Wait()
 
-            If Not (SelectedParticipant IsNot Nothing AndAlso sender.Name.Equals(SelectedParticipant.Name)) Then
-                ctxTaskFactory.StartNew(Sub() sender.HasSentNewMessage = True).Wait()
+            If Not (PartecipanteSelezionato IsNot Nothing AndAlso mittente.Nome.Equals(PartecipanteSelezionato.Nome)) Then
+                ctxTaskFactory.StartNew(Sub() mittente.HaMandatoNuovoMsg = True).Wait()
             End If
         End If
     End Sub
 
-    Private Sub ParticipantLogin(ByVal u As User)
-        Dim ptp = Participants.FirstOrDefault(Function(p) String.Equals(p.Name, u.Name))
-        If _isLoggedIn AndAlso ptp Is Nothing Then
-            ctxTaskFactory.StartNew(Sub() Participants.Add(New Participant With {.Name = u.Name, .Photo = u.Photo})).Wait()
+    Private Sub LoginPartecipante(ByVal u As Utente)
+        Dim _partecipante = Partecipanti.FirstOrDefault(Function(partecipante) String.Equals(partecipante.Nome, u.Nome))
+        If _loggato AndAlso _partecipante Is Nothing Then
+            ctxTaskFactory.StartNew(Sub() Partecipanti.Add(New Partecipante With {.Nome = u.Nome, .imgProfilo = u.imgProfilo})).Wait()
         End If
     End Sub
 
-    Private Sub ParticipantDisconnection(ByVal name As String)
-        Dim person = Participants.Where(Function(p) String.Equals(p.Name, name)).FirstOrDefault
-        If person IsNot Nothing Then person.IsLoggedIn = False
+    Private Sub DisconnessionePartecipante(ByVal nome As String)
+        Dim tizio = Partecipanti.Where(Function(partecipante) String.Equals(partecipante.Nome, nome)).FirstOrDefault
+        If tizio IsNot Nothing Then tizio.Loggato = False
     End Sub
 
-    Private Sub ParticipantReconnection(ByVal name As String)
-        Dim person = Participants.Where(Function(p) String.Equals(p.Name, name)).FirstOrDefault
-        If person IsNot Nothing Then person.IsLoggedIn = True
+    Private Sub RiconnessionePartecipante(ByVal nome As String)
+        Dim tizio = Partecipanti.Where(Function(p) String.Equals(p.Nome, nome)).FirstOrDefault
+        If tizio IsNot Nothing Then tizio.Loggato = True
     End Sub
 
-    Private Sub Reconnecting()
-        IsConnected = False
-        IsLoggedIn = False
+    Private Sub Riconnessione()
+        Connesso = False
+        Loggato = False
     End Sub
 
-    Private Async Sub Reconnected()
-        Dim pic = Avatar()
-        If Not String.IsNullOrEmpty(_userName) Then Await chatService.LoginAsync(_userName, pic)
-        IsConnected = True
-        IsLoggedIn = True
+    Private Async Sub Riconnesso()
+        Dim imgProfilo = Avatar()
+        If Not String.IsNullOrEmpty(_nomeUtente) Then Await chatService.AccessoAsincr(_nomeUtente, imgProfilo)
+        Connesso = True
+        Loggato = True
     End Sub
 
-    Private Async Sub Disconnected()
-        Dim connectionTask = chatService.ConnectAsync()
-        Await connectionTask.ContinueWith(Sub(t)
-                                              If Not t.IsFaulted Then
-                                                  IsConnected = True
-                                                  chatService.LoginAsync(_userName, Avatar()).Wait()
-                                                  IsLoggedIn = True
-                                              End If
-                                          End Sub)
+    Private Async Sub Disconnesso()
+        Dim taskConnessione = chatService.ConnessioneAsync()
+        Await taskConnessione.ContinueWith(Sub(task)
+                                               If Not task.IsFaulted Then
+                                                   Connesso = True
+                                                   chatService.AccessoAsincr(_nomeUtente, Avatar()).Wait()
+                                                   Loggato = True
+                                               End If
+                                           End Sub)
     End Sub
 
-    Private Sub ParticipantTyping(ByVal name As String)
-        Dim person = Participants.Where(Function(p) String.Equals(p.Name, name)).FirstOrDefault()
-        If person IsNot Nothing AndAlso Not person.IsTyping Then
-            person.IsTyping = True
-            Observable.Timer(TimeSpan.FromMilliseconds(1500)).Subscribe(Sub(t) person.IsTyping = False)
+    Private Sub PartecipanteStaScrivendo(ByVal nome As String)
+        Dim tizio = Partecipanti.Where(Function(p) String.Equals(p.Nome, nome)).FirstOrDefault()
+        If tizio IsNot Nothing AndAlso Not tizio.StaScrivendo Then
+            tizio.StaScrivendo = True
+            Observable.Timer(TimeSpan.FromMilliseconds(1500)).Subscribe(Sub(t) tizio.StaScrivendo = False)
         End If
     End Sub
 #End Region
 
     Private Function Avatar() As Byte()
-        Dim pic As Byte() = Nothing
-        If Not String.IsNullOrEmpty(_profilePic) Then pic = File.ReadAllBytes(_profilePic)
-        Return pic
+        Dim imgProfilo As Byte() = Nothing
+        If Not String.IsNullOrEmpty(_imgProfilo) Then imgProfilo = File.ReadAllBytes(_imgProfilo)
+        Return imgProfilo
     End Function
 
     Public Sub New(chatSvc As IChatService, diagSvc As IDialogService)
         dialogService = diagSvc
         chatService = chatSvc
-        AddHandler chatSvc.NewTextMessage, AddressOf NewTextMessage
-        AddHandler chatSvc.NewImageMessage, AddressOf NewImageMessage
-        AddHandler chatSvc.ParticipantLoggedIn, AddressOf ParticipantLogin
-        AddHandler chatSvc.ParticipantLoggedOut, AddressOf ParticipantDisconnection
-        AddHandler chatSvc.ParticipantDisconnected, AddressOf ParticipantDisconnection
-        AddHandler chatSvc.ParticipantReconnected, AddressOf ParticipantReconnection
-        AddHandler chatSvc.ParticipantTyping, AddressOf ParticipantTyping
-        AddHandler chatSvc.ConnectionReconnecting, AddressOf Reconnecting
-        AddHandler chatSvc.ConnectionReconnected, AddressOf Reconnected
-        AddHandler chatSvc.ConnectionClosed, AddressOf Disconnected
+        AddHandler chatSvc.NuovoMsgTesto, AddressOf NuovoMsgTesto
+        AddHandler chatSvc.NuovoMsgImmagine, AddressOf NuovoMsgImmagine
+        AddHandler chatSvc.PartecipanteHaFattoAccesso, AddressOf LoginPartecipante
+        AddHandler chatSvc.PartecipanteSiEDisconnesso, AddressOf DisconnessionePartecipante
+        AddHandler chatSvc.PartecipanteDisconnesso, AddressOf DisconnessionePartecipante
+        AddHandler chatSvc.PartecipanteRiconnesso, AddressOf RiconnessionePartecipante
+        AddHandler chatSvc.PartecipanteStaScrivendo, AddressOf PartecipanteStaScrivendo
+        AddHandler chatSvc.ConnessioneRiconnessione, AddressOf Riconnessione
+        AddHandler chatSvc.ConnessioneRistabilita, AddressOf Riconnesso
+        AddHandler chatSvc.ConnessioneChiusa, AddressOf Disconnesso
 
         ctxTaskFactory = New TaskFactory(TaskScheduler.FromCurrentSynchronizationContext)
     End Sub

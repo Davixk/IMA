@@ -7,18 +7,18 @@ Module ServerModule
 
     Sub Main()
         Dim url = "http://localhost:8080/"
-        Using WebApp.Start(Of Startup)(url)
-            Console.WriteLine($"Server running at {url}")
+        Using WebApp.Start(Of Avvio)(url)
+            Console.WriteLine($"Server inizializzato all'indirizzo {url}")
             Console.ReadLine()
         End Using
     End Sub
 
 End Module
 
-Public Class Startup
+Public Class Avvio
     Public Sub Configuration(app As IAppBuilder)
         app.UseCors(CorsOptions.AllowAll)
-        app.MapSignalR("/signalchat", New HubConfiguration())
+        app.MapSignalR("/InstantMessagingApp", New HubConfiguration())
 
         GlobalHost.Configuration.MaxIncomingWebSocketMessageSize = Nothing
     End Sub

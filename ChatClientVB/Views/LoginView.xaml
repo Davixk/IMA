@@ -30,20 +30,20 @@
                 <Button Grid.Row="0" Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}" 
                         HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,36,16"
                         Command="{Binding SelectProfilePicCommand}"
-                        ToolTip="Click to select picture">
+                        ToolTip="Clicca qui per inserire un'immagine">
                     <materialDesign:PackIcon Kind="FileImage" Width="20" Height="20" />
                 </Button>
                 <Border Grid.Row="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,1,0,0">
                     <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center"
                                 VerticalAlignment="Top" Margin="0,10,0,0">
                         <TextBox x:Name="UsernameTxtBox" Width="150" Margin="0,5"
-                                 materialDesign:HintAssist.Hint="Username"   
-                                 Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}">
+                                 materialDesign:HintAssist.Hint="Nome utente"   
+                                 Text="{Binding NomeUtente, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.InputBindings>
-                                <KeyBinding Command="{Binding LoginCommand}" Key="Return"/>
+                                <KeyBinding Command="{Binding ComandoAccesso}" Key="Return"/>
                             </TextBox.InputBindings>
                         </TextBox>
-                        <Button Content="Login" Margin="0,10,0,0" Command="{Binding LoginCommand}"/>
+                        <Button Content="Accedi" Margin="0,10,0,0" Command="{Binding ComandoAccesso}"/>
                     </StackPanel>
                 </Border>
             </Grid>

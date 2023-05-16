@@ -1,5 +1,5 @@
 ﻿Public Class User
-    Public Property Name As String
+    Public Property Nome As String
     Public Property ID As String
-    Public Property Photo As Byte()
+    Public Property imgProfilo As Byte()
 End Class

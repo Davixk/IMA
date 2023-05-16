@@ -46,7 +46,7 @@
             <Style x:Key="ChatContentStyle" TargetType="ContentControl">
                 <Setter Property="ContentTemplate" Value="{StaticResource LoginTemplate}"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding UserMode}" Value="{x:Static local:UserModes.Chat}">
+                    <DataTrigger Binding="{Binding ModalitaUser}" Value="{x:Static local:ModalitaUser.Chat}">
                         <Setter Property="ContentTemplate" Value="{StaticResource ChatTemplate}"/>
                     </DataTrigger>
                 </Style.Triggers>

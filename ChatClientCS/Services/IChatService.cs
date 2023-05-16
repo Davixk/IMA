@@ -8,25 +8,25 @@ namespace ChatClientCS.Services
 {
     public interface IChatService
     {
-        event Action<User> ParticipantLoggedIn;
-        event Action<string> ParticipantLoggedOut;
-        event Action<string> ParticipantDisconnected;
-        event Action<string> ParticipantReconnected;
-        event Action ConnectionReconnecting;
-        event Action ConnectionReconnected;
-        event Action ConnectionClosed;
-        event Action<string, string, MessageType> NewTextMessage;
-        event Action<string, byte[], MessageType> NewImageMessage;
-        event Action<string> ParticipantTyping;
+        event Action<Utente> PartecipanteHaFattoAccesso;
+        event Action<string> PartecipanteSiEDisconnesso;
+        event Action<string> PartecipanteDisconnesso;
+        event Action<string> PartecipanteRiconnesso;
+        event Action RiconnessioneInCorso;
+        event Action ConnessioneRistabilita;
+        event Action ConnessioneChiusa;
+        event Action<string, string, TipoDiMessaggio> NuovoMsgTesto;
+        event Action<string, byte[], TipoDiMessaggio> NuovoMsgImmagine;
+        event Action<string> PartecipanteStaScrivendo;
 
-        Task ConnectAsync();
-        Task<List<User>> LoginAsync(string name, byte[] photo);
-        Task LogoutAsync();
+        Task ConnessioneAsync();
+        Task<List<Utente>> AccessoAsincr(string nome, byte[] imgProfilo);
+        Task DisconnessioneAsincr();
 
-        Task SendBroadcastMessageAsync(string msg);
-        Task SendBroadcastMessageAsync(byte[] img);
-        Task SendUnicastMessageAsync(string recepient, string msg);
-        Task SendUnicastMessageAsync(string recepient, byte[] img);
-        Task TypingAsync(string recepient);
+        Task MandaMsgBroadcastAsincr(string testo);
+        Task MandaMsgBroadcastAsincr(byte[] img);
+        Task MandaMsgUnicastAsincr(string destinatario, string testo);
+        Task MandaMsgUnicastAsincr(string destinatario, byte[] img);
+        Task StaScrivendoAsincr(string destinatario);
     }
 }

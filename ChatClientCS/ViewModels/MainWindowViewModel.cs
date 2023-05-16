@@ -24,144 +24,144 @@ namespace ChatClientCS.ViewModels
         private const int MAX_IMAGE_WIDTH = 150;
         private const int MAX_IMAGE_HEIGHT = 150;
 
-        private string _userName;
-        public string UserName
+        private string _nomeUtente;
+        public string NomeUtente
         {
-            get { return _userName; }
+            get { return _nomeUtente; }
             set
             {
-                _userName = value;
+                _nomeUtente = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _profilePic;
-        public string ProfilePic
+        private string _imgProfilo;
+        public string imgProfilo
         {
-            get { return _profilePic; }
+            get { return _imgProfilo; }
             set
             {
-                _profilePic = value;
+                _imgProfilo = value;
                 OnPropertyChanged();
             }
         }
 
-        private ObservableCollection<Participant> _participants = new ObservableCollection<Participant>();
-        public ObservableCollection<Participant> Participants
+        private ObservableCollection<Partecipante> _partecipanti = new ObservableCollection<Partecipante>();
+        public ObservableCollection<Partecipante> Partecipanti
         {
-            get { return _participants; }
+            get { return _partecipanti; }
             set
             {
-                _participants = value;
+                _partecipanti = value;
                 OnPropertyChanged();
             }
         }
 
-        private Participant _selectedParticipant;
-        public Participant SelectedParticipant
+        private Partecipante _partecipanteSelezionato;
+        public Partecipante PartecipanteSelezionato
         {
-            get { return _selectedParticipant; }
+            get { return _partecipanteSelezionato; }
             set
             {
-                _selectedParticipant = value;
-                if (SelectedParticipant.HasSentNewMessage) SelectedParticipant.HasSentNewMessage = false;
+                _partecipanteSelezionato = value;
+                if (PartecipanteSelezionato.HaInviatoNuovoMessaggio) PartecipanteSelezionato.HaInviatoNuovoMessaggio = false;
                 OnPropertyChanged();
             }
         }
 
-        private UserModes _userMode;
-        public UserModes UserMode
+        private ModalitaUser _modalitaUser;
+        public ModalitaUser ModalitaUser
         {
-            get { return _userMode; }
+            get { return _modalitaUser; }
             set
             {
-                _userMode = value;
+                _modalitaUser = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _textMessage;
-        public string TextMessage
+        private string _msgTesto;
+        public string MsgTesto
         {
-            get { return _textMessage; }
+            get { return _msgTesto; }
             set
             {
-                _textMessage = value;
+                _msgTesto = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _isConnected;
-        public bool IsConnected
+        private bool _connesso;
+        public bool Connesso
         {
-            get { return _isConnected; }
+            get { return _connesso; }
             set
             {
-                _isConnected = value;
+                _connesso = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool _isLoggedIn;
-        public bool IsLoggedIn
+        private bool _loggato;
+        public bool Loggato
         {
-            get { return _isLoggedIn; }
+            get { return _loggato; }
             set
             {
-                _isLoggedIn = value;
+                _loggato = value;
                 OnPropertyChanged();
             }
         }
 
-        #region Connect Command
-        private ICommand _connectCommand;
-        public ICommand ConnectCommand
+        #region Operazioni di connessione
+        private ICommand _opConnessione;
+        public ICommand OpConnessione
         {
             get
             {
-                return _connectCommand ?? (_connectCommand = new RelayCommandAsync(() => Connect()));
+                return _opConnessione ?? (_opConnessione = new RelayCommandAsync(() => Connetti()));
             }
         }
 
-        private async Task<bool> Connect()
+        private async Task<bool> Connetti()
         {
             try
             {
-                await chatService.ConnectAsync();
-                IsConnected = true;
+                await chatService.ConnessioneAsync();
+                Connesso = true;
                 return true;
             }
             catch (Exception) { return false; }
         }
         #endregion
 
-        #region Login Command
-        private ICommand _loginCommand;
-        public ICommand LoginCommand
+        #region Comandi di accesso
+        private ICommand _comandoLogin;
+        public ICommand ComandoAccesso
         {
             get
             {
-                return _loginCommand ?? (_loginCommand =
-                    new RelayCommandAsync(() => Login(), (o) => CanLogin()));
+                return _comandoLogin ?? (_comandoLogin =
+                    new RelayCommandAsync(() => Accesso(), (o) => PuoAccedere()));
             }
         }
 
-        private async Task<bool> Login()
+        private async Task<bool> Accesso()
         {
             try
             {
-                List<User> users = new List<User>();
-                users = await chatService.LoginAsync(_userName, Avatar());
-                if (users != null)
+                List<Utente> utenti = new List<Utente>();
+                utenti = await chatService.AccessoAsincr(_nomeUtente, Avatar());
+                if (utenti != null)
                 {
-                    users.ForEach(u => Participants.Add(new Participant { Name = u.Name, Photo = u.Photo }));
-                    UserMode = UserModes.Chat;
-                    IsLoggedIn = true;
+                    utenti.ForEach(u => Partecipanti.Add(new Partecipante { Nome = u.Nome, imgProfilo = u.imgProfilo }));
+                    ModalitaUser = ModalitaUser.Chat;
+                    Loggato = true;
                     return true;
                 }
                 else
                 {
-                    dialogService.ShowNotification("Username is already in use");
+                    dialogService.ShowNotification("Nome utente già in uso");
                     return false;
                 }
 
@@ -169,19 +169,19 @@ namespace ChatClientCS.ViewModels
             catch (Exception) { return false; }
         }
 
-        private bool CanLogin()
+        private bool PuoAccedere()
         {
-            return !string.IsNullOrEmpty(UserName) && UserName.Length >= 2 && IsConnected;
+            return !string.IsNullOrEmpty(NomeUtente) && NomeUtente.Length >= 2 && Connesso;
         }
         #endregion
 
-        #region Logout Command
-        private ICommand _logoutCommand;
-        public ICommand LogoutCommand
+        #region Comandi di Logout
+        private ICommand _opLogout;
+        public ICommand OpLogout
         {
             get
             {
-                return _logoutCommand ?? (_logoutCommand =
+                return _opLogout ?? (_opLogout =
                     new RelayCommandAsync(() => Logout(), (o) => CanLogout()));
             }
         }
@@ -190,8 +190,8 @@ namespace ChatClientCS.ViewModels
         {
             try
             {
-                await chatService.LogoutAsync();
-                UserMode = UserModes.Login;
+                await chatService.DisconnessioneAsincr();
+                ModalitaUser = ModalitaUser.Login;
                 return true;
             }
             catch (Exception) { return false; }
@@ -199,273 +199,273 @@ namespace ChatClientCS.ViewModels
 
         private bool CanLogout()
         {
-            return IsConnected && IsLoggedIn;
+            return Connesso && Loggato;
         }
         #endregion
 
-        #region Typing Command
-        private ICommand _typingCommand;
-        public ICommand TypingCommand
+        #region Comandi Scrittura
+        private ICommand _opStaScivendo;
+        public ICommand OpStaScrivendo
         {
             get
             {
-                return _typingCommand ?? (_typingCommand =
-                    new RelayCommandAsync(() => Typing(), (o) => CanUseTypingCommand()));
+                return _opStaScivendo ?? (_opStaScivendo =
+                    new RelayCommandAsync(() => StaScrivendo(), (o) => PuoUsareStaScrivendo()));
             }
         }
 
-        private async Task<bool> Typing()
+        private async Task<bool> StaScrivendo()
         {
             try
             {
-                await chatService.TypingAsync(SelectedParticipant.Name);
+                await chatService.StaScrivendoAsincr(PartecipanteSelezionato.Nome);
                 return true;
             }
             catch (Exception) { return false; }
         }
 
-        private bool CanUseTypingCommand()
+        private bool PuoUsareStaScrivendo()
         {
-            return (SelectedParticipant != null && SelectedParticipant.IsLoggedIn);
+            return (PartecipanteSelezionato != null && PartecipanteSelezionato.Loggato);
         }
         #endregion
 
-        #region Send Text Message Command
-        private ICommand _sendTextMessageCommand;
-        public ICommand SendTextMessageCommand
+        #region Comando per inviare messaggi di testo
+        private ICommand _opInviaMsgTesto;
+        public ICommand OpInviaMsgTesto
         {
             get
             {
-                return _sendTextMessageCommand ?? (_sendTextMessageCommand =
-                    new RelayCommandAsync(() => SendTextMessage(), (o) => CanSendTextMessage()));
+                return _opInviaMsgTesto ?? (_opInviaMsgTesto =
+                    new RelayCommandAsync(() => InviaMsgTesto(), (o) => PuoInviareMsgTesto()));
             }
         }
 
-        private async Task<bool> SendTextMessage()
+        private async Task<bool> InviaMsgTesto()
         {
             try
             {
-                var recepient = _selectedParticipant.Name;
-                await chatService.SendUnicastMessageAsync(recepient, _textMessage);
+                var destinatario = _partecipanteSelezionato.Nome;
+                await chatService.MandaMsgUnicastAsincr(destinatario, _msgTesto);
                 return true;
             }
             catch (Exception) { return false; }
             finally
             {
-                ChatMessage msg = new ChatMessage
+                MessaggioChat msg = new MessaggioChat
                 {
-                    Author = UserName,
-                    Message = _textMessage,
-                    Time = DateTime.Now,
+                    Autore = NomeUtente,
+                    Testo = _msgTesto,
+                    DataOra = DateTime.Now,
                     IsOriginNative = true
                 };
-                SelectedParticipant.Chatter.Add(msg);
-                TextMessage = string.Empty;
+                PartecipanteSelezionato.Chatter.Add(msg);
+                MsgTesto = string.Empty;
             }
         }
 
-        private bool CanSendTextMessage()
+        private bool PuoInviareMsgTesto()
         {
-            return (!string.IsNullOrEmpty(TextMessage) && IsConnected &&
-                _selectedParticipant != null && _selectedParticipant.IsLoggedIn);
+            return (!string.IsNullOrEmpty(MsgTesto) && Connesso &&
+                _partecipanteSelezionato != null && _partecipanteSelezionato.Loggato);
         }
         #endregion
 
-        #region Send Picture Message Command
-        private ICommand _sendImageMessageCommand;
-        public ICommand SendImageMessageCommand
+        #region Comando per inviare immagini
+        private ICommand _opInviaMsgImmagine;
+        public ICommand OpInviaMsgImmagine
         {
             get
             {
-                return _sendImageMessageCommand ?? (_sendImageMessageCommand =
-                    new RelayCommandAsync(() => SendImageMessage(), (o) => CanSendImageMessage()));
+                return _opInviaMsgImmagine ?? (_opInviaMsgImmagine =
+                    new RelayCommandAsync(() => InviaMsgImmagine(), (o) => PuoInviareMsgImmagine()));
             }
         }
 
-        private async Task<bool> SendImageMessage()
+        private async Task<bool> InviaMsgImmagine()
         {
-            var pic = dialogService.OpenFile("Select image file", "Images (*.jpg;*.png)|*.jpg;*.png");
-            if (string.IsNullOrEmpty(pic)) return false;
+            var immagine = dialogService.OpenFile("Seleziona file immagine", "Immagini (*.jpg;*.png)|*.jpg;*.png");
+            if (string.IsNullOrEmpty(immagine)) return false;
 
-            var img = await Task.Run(() => File.ReadAllBytes(pic));
+            var img = await Task.Run(() => File.ReadAllBytes(immagine));
 
             try
             {
-                var recepient = _selectedParticipant.Name;
-                await chatService.SendUnicastMessageAsync(recepient, img);
+                var destinatario = _partecipanteSelezionato.Nome;
+                await chatService.MandaMsgUnicastAsincr(destinatario, img);
                 return true;
             }
             catch (Exception) { return false; }
             finally
             {
-                ChatMessage msg = new ChatMessage { Author = UserName, Picture = pic, Time = DateTime.Now, IsOriginNative = true };
-                SelectedParticipant.Chatter.Add(msg);
+                MessaggioChat msg = new MessaggioChat { Autore = NomeUtente, Immagine = immagine, DataOra = DateTime.Now, IsOriginNative = true };
+                PartecipanteSelezionato.Chatter.Add(msg);
             }           
         }
 
-        private bool CanSendImageMessage()
+        private bool PuoInviareMsgImmagine()
         {
-            return (IsConnected && _selectedParticipant != null && _selectedParticipant.IsLoggedIn);
+            return (Connesso && _partecipanteSelezionato != null && _partecipanteSelezionato.Loggato);
         }
         #endregion
 
-        #region Select Profile Picture Command
-        private ICommand _selectProfilePicCommand;
-        public ICommand SelectProfilePicCommand
+        #region Operazione Selezione Immagine Profilo
+        private ICommand _opSelezionaImgProfilo;
+        public ICommand OpSelezionaImgProfilo
         {
             get
             {
-                return _selectProfilePicCommand ?? (_selectProfilePicCommand =
-                    new RelayCommand((o) => SelectProfilePic()));
+                return _opSelezionaImgProfilo ?? (_opSelezionaImgProfilo =
+                    new RelayCommand((o) => SelezionaImgProfilo()));
             }
         }
 
-        private void SelectProfilePic()
+        private void SelezionaImgProfilo()
         {
-            var pic = dialogService.OpenFile("Select image file", "Images (*.jpg;*.png)|*.jpg;*.png");
-            if (!string.IsNullOrEmpty(pic))
+            var _imgProfilo = dialogService.OpenFile("Seleziona file immagine", "Immagini (*.jpg;*.png)|*.jpg;*.png");
+            if (!string.IsNullOrEmpty(_imgProfilo))
             {
-                var img = Image.FromFile(pic);
+                var img = Image.FromFile(_imgProfilo);
                 if (img.Width > MAX_IMAGE_WIDTH || img.Height > MAX_IMAGE_HEIGHT)
                 {
-                    dialogService.ShowNotification($"Image size should be {MAX_IMAGE_WIDTH} x {MAX_IMAGE_HEIGHT} or less.");
+                    dialogService.ShowNotification($"Le dimensioni della immagine devono esesere di {MAX_IMAGE_WIDTH} x {MAX_IMAGE_HEIGHT} o inferiori.");
                     return;
                 }
-                ProfilePic = pic;
+                imgProfilo = _imgProfilo;
             }
         }
         #endregion
 
-        #region Open Image Command
-        private ICommand _openImageCommand;
-        public ICommand OpenImageCommand
+        #region Comando per aprire immagini
+        private ICommand _opApriImmagine;
+        public ICommand OpApriImmagine
         {
             get
             {
-                return _openImageCommand ?? (_openImageCommand =
-                    new RelayCommand<ChatMessage>((m) => OpenImage(m)));
+                return _opApriImmagine ?? (_opApriImmagine =
+                    new RelayCommand<MessaggioChat>((m) => ApriImmagine(m)));
             }
         }
 
-        private void OpenImage(ChatMessage msg)
+        private void ApriImmagine(MessaggioChat messaggio)
         {
-            var img = msg.Picture;
+            var img = messaggio.Immagine;
             if (string.IsNullOrEmpty(img) || !File.Exists(img)) return;
             Process.Start(img);
         }
         #endregion
 
-        #region Event Handlers
-        private void NewTextMessage(string name, string msg, MessageType mt)
+        #region Gestore Eventi (Event Handlers)
+        private void NuovoMsgTesto(string nome, string testo, TipoDiMessaggio tipoMsg)
         {
-            if (mt == MessageType.Unicast)
+            if (tipoMsg == TipoDiMessaggio.Unicast)
             {
-                ChatMessage cm = new ChatMessage { Author = name, Message = msg, Time = DateTime.Now };
-                var sender = _participants.Where((u) => string.Equals(u.Name, name)).FirstOrDefault();
-                ctxTaskFactory.StartNew(() => sender.Chatter.Add(cm)).Wait();
+                MessaggioChat msgChat = new MessaggioChat { Autore = nome, Testo = testo, DataOra = DateTime.Now };
+                var mittente = _partecipanti.Where((u) => string.Equals(u.Nome, nome)).FirstOrDefault();
+                ctxTaskFactory.StartNew(() => mittente.Chatter.Add(msgChat)).Wait();
 
-                if (!(SelectedParticipant != null && sender.Name.Equals(SelectedParticipant.Name)))
+                if (!(PartecipanteSelezionato != null && mittente.Nome.Equals(PartecipanteSelezionato.Nome)))
                 {
-                    ctxTaskFactory.StartNew(() => sender.HasSentNewMessage = true).Wait();
+                    ctxTaskFactory.StartNew(() => mittente.HaInviatoNuovoMessaggio = true).Wait();
                 }
             }
         }
 
-        private void NewImageMessage(string name, byte[] pic, MessageType mt)
+        private void NuovoMsgImmagine(string nome, byte[] immagine, TipoDiMessaggio tipoMsg)
         {
-            if (mt == MessageType.Unicast)
+            if (tipoMsg == TipoDiMessaggio.Unicast)
             {
-                var imgsDirectory = Path.Combine(Environment.CurrentDirectory, "Image Messages");
-                if (!Directory.Exists(imgsDirectory)) Directory.CreateDirectory(imgsDirectory);
+                var CartellaImmagini = Path.Combine(Environment.CurrentDirectory, "Image Messages");
+                if (!Directory.Exists(CartellaImmagini)) Directory.CreateDirectory(CartellaImmagini);
 
-                var imgsCount = Directory.EnumerateFiles(imgsDirectory).Count() + 1;
-                var imgPath = Path.Combine(imgsDirectory, $"IMG_{imgsCount}.jpg");
+                var contImmagini = Directory.EnumerateFiles(CartellaImmagini).Count() + 1;
+                var percorsoImmagine = Path.Combine(CartellaImmagini, $"IMG_{contImmagini}.jpg");
 
-                ImageConverter converter = new ImageConverter();
-                using (Image img = (Image)converter.ConvertFrom(pic))
+                ImageConverter convertitoreImmagini = new ImageConverter();
+                using (Image img = (Image)convertitoreImmagini.ConvertFrom(immagine))
                 {
-                    img.Save(imgPath);
+                    img.Save(percorsoImmagine);
                 }
 
-                ChatMessage cm = new ChatMessage { Author = name, Picture = imgPath, Time = DateTime.Now };
-                var sender = _participants.Where(u => string.Equals(u.Name, name)).FirstOrDefault();
-                ctxTaskFactory.StartNew(() => sender.Chatter.Add(cm)).Wait();
+                MessaggioChat msgChat = new MessaggioChat { Autore = nome, Immagine = percorsoImmagine, DataOra = DateTime.Now };
+                var mittente = _partecipanti.Where(u => string.Equals(u.Nome, nome)).FirstOrDefault();
+                ctxTaskFactory.StartNew(() => mittente.Chatter.Add(msgChat)).Wait();
 
-                if (!(SelectedParticipant != null && sender.Name.Equals(SelectedParticipant.Name)))
+                if (!(PartecipanteSelezionato != null && mittente.Nome.Equals(PartecipanteSelezionato.Nome)))
                 {
-                    ctxTaskFactory.StartNew(() => sender.HasSentNewMessage = true).Wait();
+                    ctxTaskFactory.StartNew(() => mittente.HaInviatoNuovoMessaggio = true).Wait();
                 }
             }
         }
 
-        private void ParticipantLogin(User u)
+        private void LoginPartecipante(Utente u)
         {
-            var ptp = Participants.FirstOrDefault(p => string.Equals(p.Name, u.Name));
-            if (_isLoggedIn && ptp == null)
+            var _partecipante = Partecipanti.FirstOrDefault(partecipante => string.Equals(partecipante.Nome, u.Nome));
+            if (_loggato && _partecipante == null)
             {
-                ctxTaskFactory.StartNew(() => Participants.Add(new Participant
+                ctxTaskFactory.StartNew(() => Partecipanti.Add(new Partecipante
                 {
-                    Name = u.Name,
-                    Photo = u.Photo
+                    Nome = u.Nome,
+                    imgProfilo = u.imgProfilo
                 })).Wait();
             }
         }
 
-        private void ParticipantDisconnection(string name)
+        private void DisconnessionePartecipante(string nome)
         {
-            var person = Participants.Where((p) => string.Equals(p.Name, name)).FirstOrDefault();
-            if (person != null) person.IsLoggedIn = false;
+            var tizio = Partecipanti.Where((partecipante) => string.Equals(partecipante.Nome, nome)).FirstOrDefault();
+            if (tizio != null) tizio.Loggato = false;
         }
 
-        private void ParticipantReconnection(string name)
+        private void RiconnessionePartecipante(string nome)
         {
-            var person = Participants.Where((p) => string.Equals(p.Name, name)).FirstOrDefault();
-            if (person != null) person.IsLoggedIn = true;
+            var tizio = Partecipanti.Where((partecipante) => string.Equals(partecipante.Nome, nome)).FirstOrDefault();
+            if (tizio != null) tizio.Loggato = true;
         }
 
-        private void Reconnecting()
+        private void Riconnessione()
         {
-            IsConnected = false;
-            IsLoggedIn = false;
+            Connesso = false;
+            Loggato = false;
         }
 
-        private async void Reconnected()
+        private async void Riconnesso()
         {
-            var pic = Avatar();
-            if (!string.IsNullOrEmpty(_userName)) await chatService.LoginAsync(_userName, pic);
-            IsConnected = true;
-            IsLoggedIn = true;
+            var imgProfilo = Avatar();
+            if (!string.IsNullOrEmpty(_nomeUtente)) await chatService.AccessoAsincr(_nomeUtente, imgProfilo);
+            Connesso = true;
+            Loggato = true;
         }
 
-        private async void Disconnected()
+        private async void Disconnesso()
         {
-            var connectionTask = chatService.ConnectAsync();
-            await connectionTask.ContinueWith(t => {
-                if (!t.IsFaulted)
+            var taskConnessione = chatService.ConnessioneAsync();
+            await taskConnessione.ContinueWith(task => {
+                if (!task.IsFaulted)
                 {
-                    IsConnected = true;
-                    chatService.LoginAsync(_userName, Avatar()).Wait();
-                    IsLoggedIn = true;
+                    Connesso = true;
+                    chatService.AccessoAsincr(_nomeUtente, Avatar()).Wait();
+                    Loggato = true;
                 }
             });
         }
 
-        private void ParticipantTyping(string name)
+        private void PartecipanteStaScrivendo(string nome)
         {
-            var person = Participants.Where((p) => string.Equals(p.Name, name)).FirstOrDefault();
-            if (person != null && !person.IsTyping)
+            var tizio = Partecipanti.Where((p) => string.Equals(p.Nome, nome)).FirstOrDefault();
+            if (tizio != null && !tizio.StaScrivendo)
             {
-                person.IsTyping = true;
-                Observable.Timer(TimeSpan.FromMilliseconds(1500)).Subscribe(t => person.IsTyping = false);
+                tizio.StaScrivendo = true;
+                Observable.Timer(TimeSpan.FromMilliseconds(1500)).Subscribe(t => tizio.StaScrivendo = false);
             }
         }
         #endregion
 
         private byte[] Avatar()
         {
-            byte[] pic = null;
-            if (!string.IsNullOrEmpty(_profilePic)) pic = File.ReadAllBytes(_profilePic);
-            return pic;
+            byte[] imgProfilo = null;
+            if (!string.IsNullOrEmpty(_imgProfilo)) imgProfilo = File.ReadAllBytes(_imgProfilo);
+            return imgProfilo;
         }
 
         public MainWindowViewModel(IChatService chatSvc, IDialogService diagSvc)
@@ -473,16 +473,16 @@ namespace ChatClientCS.ViewModels
             dialogService = diagSvc;
             chatService = chatSvc;
 
-            chatSvc.NewTextMessage += NewTextMessage;
-            chatSvc.NewImageMessage += NewImageMessage;
-            chatSvc.ParticipantLoggedIn += ParticipantLogin;
-            chatSvc.ParticipantLoggedOut += ParticipantDisconnection;
-            chatSvc.ParticipantDisconnected += ParticipantDisconnection;
-            chatSvc.ParticipantReconnected += ParticipantReconnection;
-            chatSvc.ParticipantTyping += ParticipantTyping;
-            chatSvc.ConnectionReconnecting += Reconnecting;
-            chatSvc.ConnectionReconnected += Reconnected;
-            chatSvc.ConnectionClosed += Disconnected;
+            chatSvc.NuovoMsgTesto += NuovoMsgTesto;
+            chatSvc.NuovoMsgImmagine += NuovoMsgImmagine;
+            chatSvc.PartecipanteHaFattoAccesso += LoginPartecipante;
+            chatSvc.PartecipanteSiEDisconnesso += DisconnessionePartecipante;
+            chatSvc.PartecipanteDisconnesso += DisconnessionePartecipante;
+            chatSvc.PartecipanteRiconnesso += RiconnessionePartecipante;
+            chatSvc.PartecipanteStaScrivendo += PartecipanteStaScrivendo;
+            chatSvc.RiconnessioneInCorso += Riconnessione;
+            chatSvc.ConnessioneRistabilita += Riconnesso;
+            chatSvc.ConnessioneChiusa += Disconnesso;
 
             ctxTaskFactory = new TaskFactory(TaskScheduler.FromCurrentSynchronizationContext());
         }

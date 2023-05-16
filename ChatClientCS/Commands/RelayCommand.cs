@@ -4,23 +4,31 @@ using System.Windows.Input;
 
 namespace ChatClientCS.Commands
 {
+    /*SPIEGA ICOMMANDS ECCCCC
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * */
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> _execute;
-        private readonly Predicate<object> _canExecute;
+        private readonly Action<object> _esegui;
+        private readonly Predicate<object> _puoEseguire;
 
-        public RelayCommand(Action<object> execute) : this(execute, null) { }
+        public RelayCommand(Action<object> esegui) : this(esegui, null) { }
 
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        public RelayCommand(Action<object> esegui, Predicate<object> puoEseguire)
         {
-            if (execute == null) throw new ArgumentNullException("execute");
-            _execute = execute;
-            _canExecute = canExecute;
+            if (esegui == null) throw new ArgumentNullException("esegui");
+            _esegui = esegui;
+            _puoEseguire = puoEseguire;
         }
 
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object parametro)
         {
-            return _canExecute == null ? true : _canExecute(parameter);
+            return _puoEseguire == null ? true : _puoEseguire(parametro);
         }
 
         public event EventHandler CanExecuteChanged
@@ -29,30 +37,30 @@ namespace ChatClientCS.Commands
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public void Execute(object parameter)
+        public void Execute(object parametro)
         {
-            _execute(parameter);
+            _esegui(parametro);
         }
     }
 
     public class RelayCommand<T> : ICommand
     {
-        private readonly Action<T> _execute;
-        private readonly Predicate<T> _canExecute;
+        private readonly Action<T> _esegui;
+        private readonly Predicate<T> _puoEseguire;
 
         public RelayCommand(Action<T> execute) : this(execute, null) { }
 
-        public RelayCommand(Action<T> execute, Predicate<T> canExecute)
+        public RelayCommand(Action<T> esegui, Predicate<T> canExecute)
         {
-            if (execute == null) throw new ArgumentNullException("execute");
-            _execute = execute;
-            _canExecute = canExecute;
+            if (esegui == null) throw new ArgumentNullException("esegui");
+            _esegui = esegui;
+            _puoEseguire = canExecute;
         }
 
         [DebuggerStepThrough()]
         public bool CanExecute(object parameter)
         {
-            return _canExecute == null ? true : _canExecute((T)parameter);
+            return _puoEseguire == null ? true : _puoEseguire((T)parameter);
         }
 
         public event EventHandler CanExecuteChanged
@@ -63,7 +71,7 @@ namespace ChatClientCS.Commands
 
         public void Execute(object parameter)
         {
-            _execute((T)parameter);
+            _esegui((T)parameter);
         }
     }
 }

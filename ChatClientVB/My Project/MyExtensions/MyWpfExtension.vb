@@ -31,7 +31,7 @@ Namespace My
         End Property
         ''' <summary>
         ''' Returns information for the current user.  If you wish to run the application with the current 
-        ''' Windows user credentials, call My.User.InitializeWithWindowsUser().
+        ''' Windows user credentials, call My.Utente.InitializeWithWindowsUser().
         ''' </summary>
         <Global.System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")>  _
         Friend ReadOnly Property User() As Global.Microsoft.VisualBasic.ApplicationServices.User

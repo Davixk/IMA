@@ -9,7 +9,6 @@
              xmlns:Converters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"             
              Background="{DynamicResource MaterialDesignPaper}"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type local:SampleMainWindowViewModel}}"
              d:DesignHeight="400" d:DesignWidth="650">
     <UserControl.Resources>
         <Style x:Key="SendButtonStyle" TargetType="{x:Type Button}">
@@ -135,7 +134,7 @@
                     </Grid.ColumnDefinitions>
                     <Rectangle x:Name="ParticipantRct" Fill="{DynamicResource PrimaryHueMidBrush}"
                                Visibility="Hidden"/>
-                    <!--Pic-->
+                    <!--Foto profilo-->
                     <Grid Grid.Column="1" Margin="6" SnapsToDevicePixels="True">
                         <Grid.OpacityMask>
                             <VisualBrush Visual="{Binding ElementName=ClipEllipse}"/>
@@ -143,20 +142,20 @@
                         <Ellipse x:Name="ClipEllipse" Fill="White"/>
                         <materialDesign:PackIcon Kind="AccountCircle" SnapsToDevicePixels="True" Width="Auto" Height="Auto"
                                                  Margin="-4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                        <Image Source="{Binding Photo, Converter={StaticResource ByteBmpSrcConverter},
+                        <Image Source="{Binding imgProfilo, Converter={StaticResource ByteBmpSrcConverter},
                             TargetNullValue={StaticResource BlankImage}}" Stretch="UniformToFill"/>
                     </Grid>
-                    <!--Name-->
+                    <!--Nome-->
                     <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left"
                                Margin="5,0" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                               Text="{Binding Name}" SnapsToDevicePixels="True"/>
+                               Text="{Binding Nome}" SnapsToDevicePixels="True"/>
 
-                    <!--New Message icon-->
+                    <!--Icona nuovo messaggio-->
                     <materialDesign:PackIcon Name="NewMessageIcon" Grid.Column="3" SnapsToDevicePixels="True"
                                              VerticalAlignment="Center" HorizontalAlignment="Center"
                                              Kind="MessageReplyText" Opacity="0.7" Visibility="Hidden"/>
 
-                    <!--Typing icon-->
+                    <!--Icona sta scrivendo-->
                     <materialDesign:PackIcon Name="TypingIcon" Grid.Column="3" SnapsToDevicePixels="True"
                                              VerticalAlignment="Center" HorizontalAlignment="Center"
                                              Kind="Feather" Opacity="0.8" Visibility="Hidden"/>
@@ -170,9 +169,9 @@
                                 <Style.Triggers>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding DataContext.IsConnected, 
+                                            <Condition Binding="{Binding DataContext.Connesso, 
                                                 RelativeSource={RelativeSource FindAncestor, AncestorType=UserControl}}" Value="True"/>
-                                            <Condition Binding="{Binding IsLoggedIn}" Value="True"/>
+                                            <Condition Binding="{Binding Loggato}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="Fill" Value="#64DD17"/>
@@ -185,10 +184,10 @@
                 </Grid>
             </Border>
             <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding HasSentNewMessage}" Value="True">
+                <DataTrigger Binding="{Binding HaInviatoNuovoMessaggio}" Value="True">
                     <Setter TargetName="NewMessageIcon" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding IsTyping}" Value="True">
+                <DataTrigger Binding="{Binding StaScrivendo}" Value="True">
                     <Setter TargetName="NewMessageIcon" Property="Visibility" Value="Hidden"/>
                     <Setter TargetName="TypingIcon" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
@@ -215,12 +214,12 @@
                         </Grid.OpacityMask>
                         <Border x:Name="ClipBorder" CornerRadius="3" Background="White"/>
                         <Image Stretch="UniformToFill" Cursor="Hand" 
-                               ToolTip="Click to open image in your default image viewer"
-                               Source="{Binding Picture}">
+                               ToolTip="Clicca per aprire immagine nel tuo viewer predefinito"
+                               Source="{Binding Immagine}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="MouseLeftButtonUp">
                                     <i:InvokeCommandAction
-                                        Command="{Binding DataContext.OpenImageCommand, 
+                                        Command="{Binding DataContext.OpApriImmagine, 
                                         RelativeSource={RelativeSource FindAncestor, AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"/>
                                 </i:EventTrigger>
@@ -229,10 +228,10 @@
                     </Grid>
                     <TextBlock x:Name="MessageTxtBlock" Grid.Row="1" Margin="7,5,7,0" TextWrapping="Wrap" 
                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                               Text="{Binding Message}"/>
+                               Text="{Binding Testo}"/>
                     <TextBlock Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Stretch"
                                Margin="0,0,5,0" FontSize="10" Opacity="0.8"
-                               Text="{Binding Time, StringFormat={}{0:t}}"/>
+                               Text="{Binding DataOra, StringFormat={}{0:t}}"/>
                 </Grid>
             </Border>
             <DataTemplate.Triggers>
@@ -242,16 +241,16 @@
                     <Setter TargetName="MessageBorder" Property="Background" Value="#BBDEFB"/>
                     <Setter TargetName="MessageBorder" Property="BorderBrush" Value="#64B5F6"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Picture}" Value="{x:Null}">
+                <DataTrigger Binding="{Binding Immagine}" Value="{x:Null}">
                     <Setter TargetName="ImageMessageGrid" Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Message}" Value="{x:Null}">
+                <DataTrigger Binding="{Binding Testo}" Value="{x:Null}">
                     <Setter TargetName="MessageTxtBlock" Property="Visibility" Value="Collapsed"/>
                     <Setter TargetName="MessageBorder" Property="MaxWidth" Value="320"/>
                 </DataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding Message}" Value="{x:Null}"/>
+                        <Condition Binding="{Binding Testo}" Value="{x:Null}"/>
                         <Condition Binding="{Binding IsOriginNative}" Value="True"/>
                     </MultiDataTrigger.Conditions>
                     <MultiDataTrigger.Setters>
@@ -275,17 +274,17 @@
 
         <Border Grid.RowSpan="2" BorderThickness="0,0,1,0" SnapsToDevicePixels="True"
                 BorderBrush="{DynamicResource MaterialDesignDivider}">
-            <ListBox ItemsSource="{Binding Participants}" 
+            <ListBox ItemsSource="{Binding Partecipanti}" 
                      ItemTemplate="{DynamicResource ParticipantsDataTemplate}"
                      ItemContainerStyle="{DynamicResource ParticipantsListBoxItemStyle}"
-                     SelectedItem="{Binding SelectedParticipant}"                     
+                     SelectedItem="{Binding PartecipanteSelezionato}"                     
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"/>
         </Border>
 
-        <!--Messages-->
+        <!--Messaggi-->
         <ItemsControl x:Name="MessagesItemsCtrl" Grid.Column="1" Margin="0,5,0,0" 
-                      ItemsSource="{Binding SelectedParticipant.Chatter}" 
+                      ItemsSource="{Binding PartecipanteSelezionato.Chatter}" 
                       ItemTemplate="{DynamicResource MessagesDataTemplate}"
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
             <i:Interaction.Behaviors>
@@ -307,7 +306,7 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="50"/>
                 </Grid.ColumnDefinitions>
-                <!--Message-->
+                <!--Messaggio-->
                 <Border Margin="10,10,0,10" MaxHeight="80"
                         BorderThickness="1" BorderBrush="{DynamicResource MaterialDesignDivider}">
                     <Grid>
@@ -315,27 +314,27 @@
                             <ColumnDefinition/>
                             <ColumnDefinition Width="30"/>
                         </Grid.ColumnDefinitions>
-                        <!--Text-->
+                        <!--Testo-->
                         <TextBox x:Name="MessageTxtBox" BorderBrush="Transparent"
                                  TextWrapping="Wrap" AcceptsReturn="True" CaretBrush="#7F000000"
                                  VerticalScrollBarVisibility="Auto"
-                                 Text="{Binding TextMessage, UpdateSourceTrigger=PropertyChanged}">
+                                 Text="{Binding MsgTesto, UpdateSourceTrigger=PropertyChanged}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="KeyUp">
-                                    <i:InvokeCommandAction Command="{Binding TypingCommand}"/>
+                                    <i:InvokeCommandAction Command="{Binding OpStaScrivendo}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </TextBox>
-                        <!--Image-->
+                        <!--Immagine-->
                         <Button Grid.Column="1" Foreground="#FF6E6E6E" Margin="4"
                                 Style="{DynamicResource ImageButtonStyle}"
-                                Command="{Binding SendImageMessageCommand}"/>
+                                Command="{Binding OpInviaMsgImmagine}"/>
                     </Grid>
                 </Border>
-                <!--Send-->
+                <!--Invia-->
                 <Button x:Name="SendButton" Grid.Column="1" Margin="10"
                         Style="{DynamicResource SendButtonStyle}"
-                        Command="{Binding SendTextMessageCommand}"/>
+                        Command="{Binding OpInviaMsgTesto}"/>
             </Grid>
         </Border>
     </Grid>

@@ -6,22 +6,22 @@ namespace ChatClientCS.Commands
 {
     public class RelayCommandAsync : ICommand
     {
-        private readonly Func<Task> _execute;
-        private readonly Predicate<object> _canExecute;
-        private bool isExecuting;
+        private readonly Func<Task> _esegui;
+        private readonly Predicate<object> _puoEseguire;
+        private bool staEseguendo;
 
-        public RelayCommandAsync(Func<Task> execute) : this(execute, null) { }
+        public RelayCommandAsync(Func<Task> esegui) : this(esegui, null) { }
 
-        public RelayCommandAsync(Func<Task> execute, Predicate<object> canExecute)
+        public RelayCommandAsync(Func<Task> esegui, Predicate<object> canExecute)
         {
-            _execute = execute;
-            _canExecute = canExecute;
+            _esegui = esegui;
+            _puoEseguire = canExecute;
         }
 
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object parametro)
         {
-            if (!isExecuting && _canExecute == null) return true;
-            return (!isExecuting && _canExecute(parameter));
+            if (!staEseguendo && _puoEseguire == null) return true;
+            return (!staEseguendo && _puoEseguire(parametro));
         }
 
         public event EventHandler CanExecuteChanged
@@ -32,9 +32,9 @@ namespace ChatClientCS.Commands
 
         public async void Execute(object parameter)
         {
-            isExecuting = true;
-            try { await _execute(); }
-            finally { isExecuting = false; }
+            staEseguendo = true;
+            try { await _esegui(); }
+            finally { staEseguendo = false; }
         }
     }
 }

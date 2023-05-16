@@ -1,22 +1,22 @@
 ﻿Public Class RelayCommandAsync
     Implements ICommand
 
-    Private ReadOnly _execute As Func(Of Task)
-    Private ReadOnly _canExecute As Predicate(Of Object)
-    Private isExecuting As Boolean
+    Private ReadOnly _esegui As Func(Of Task)
+    Private ReadOnly _puoEseguire As Predicate(Of Object)
+    Private inEsecuzione As Boolean
 
-    Public Sub New(execute As Func(Of Task))
-        Me.New(execute, Nothing)
+    Public Sub New(esegui As Func(Of Task))
+        Me.New(esegui, Nothing)
     End Sub
 
-    Public Sub New(execute As Func(Of Task), canExecute As Predicate(Of Object))
-        _execute = execute
-        _canExecute = canExecute
+    Public Sub New(esegui As Func(Of Task), eseguibile As Predicate(Of Object))
+        _esegui = esegui
+        _puoEseguire = eseguibile
     End Sub
 
-    Public Function CanExecute(parameter As Object) As Boolean Implements ICommand.CanExecute
-        If Not isExecuting AndAlso _canExecute Is Nothing Then Return True
-        Return Not isExecuting AndAlso _canExecute(parameter)
+    Public Function CanExecute(parametro As Object) As Boolean Implements ICommand.CanExecute
+        If Not inEsecuzione AndAlso _puoEseguire Is Nothing Then Return True
+        Return Not inEsecuzione AndAlso _puoEseguire(parametro)
     End Function
 
     Public Custom Event CanExecuteChanged As EventHandler Implements ICommand.CanExecuteChanged
@@ -32,12 +32,12 @@
         End RaiseEvent
     End Event
 
-    Public Async Sub Execute(parameter As Object) Implements ICommand.Execute
-        isExecuting = True
+    Public Async Sub Execute(parametro As Object) Implements ICommand.Execute
+        inEsecuzione = True
         Try
-            Await _execute()
+            Await _esegui()
         Finally
-            isExecuting = False
+            inEsecuzione = False
         End Try
     End Sub
 End Class
